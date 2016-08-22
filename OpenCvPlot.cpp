@@ -20,6 +20,7 @@ OpenCvPlot::~OpenCvPlot()
 
 void OpenCvPlot::SimplePlot(double* data)
 {
+    /*
     // Create black empty images
     cv::Mat image = cv::Mat::zeros( 400, 400, CV_8UC3 );
     
@@ -31,4 +32,5 @@ void OpenCvPlot::SimplePlot(double* data)
     cv::destroyWindow("Image");
     cv::waitKey(-1);
     imshow("Image", image);
+    */
 }
