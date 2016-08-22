@@ -17,7 +17,6 @@ int main(int argc, const char * argv[])
     std::cout << "Neural Network Manager\n";
     
     FcNetwork::FcNetwork* net = new FcNetwork::FcNetwork();
-    net->Start();
 
     delete(net);
     return 0;

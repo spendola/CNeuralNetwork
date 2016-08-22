@@ -15,57 +15,63 @@ FcNetwork::FcNetwork()
     std::cout << "Initializing Fully Connected Network\n";
     srand((unsigned)time(0));
     hiddenLayer = NULL;
-    dataLoader = new DataLoader();
+    outputs = NULL;
+    inputs = NULL;
+    dataLoader = NULL;
     
-    int choice = 0;
+    int choice = 0;    
+    std::cout << "\nChoose a Network Model\n";
+    std::cout << "1) Mnist Fully Connected Network\n";
+    std::cout << "2) Sentiment Analysis Fully Connected Network\n";
+    std::cout << "3) Exit\n";
+    std::cin >> choice;
     
-    while(true)
+    switch (choice)
     {
-        std::cout << "\nChoose a Network Model\n";
-        std::cout << "1) Mnist Fully Connected Network\n";
-        std::cout << "2) Sentiment Analysis Fully Connected Network\n";
-        std::cout << "3) Exit\n";
-        std::cin >> choice;
-        
-        switch (choice)
-        {
-            case 1:
-                nIn = 784;
-                nOut = 10;
-                
-                inputs = new double[nIn];
-                outputs = new double[nOut];
-                
-                CreateLayer(nIn, 100);
-                CreateLayer(100, nOut);
-                
-                dataLoader->LoadMnistTrainingData("Training Data/Mnist/MnistTrainingData.txt", 50000, 784, 10);
-                dataLoader->LoadMnistValidationData("Training Data/Mnist/MnistValidationData.txt", 10000, 784, 1);
-                Start();
-                SaveParameters("Saved/MnistParameters.txt");
-                break;
-                
-            case 2:
-                nIn = 32;
-                nOut = 2;
-                
-                inputs = new double[nIn];
-                outputs = new double[nOut];
-                
-                CreateLayer(nIn, 80);
-                CreateLayer(80, nOut);
-                
-                dataLoader->CreateDictionary("Training Data/Sentiment/TrainingData.txt");
-                dataLoader->LoadSentimentTrainingData("Training Data/Sentiment/TrainingData Reinforced.txt", 32, 2);
-                dataLoader->LoadSentimentValidationData("Training Data/Sentiment/ValidationData.txt", 32, 1);
-                Start();
-                SaveParameters("Saved/SentimentAnalysisParameters.txt");
-                break;
-                
-            default:
-                break;
-        }
+        case 1:
+            nIn = 784;
+            nOut = 10;
+            
+            inputs = new double[nIn];
+            outputs = new double[nOut];
+            
+            CreateLayer(nIn, 100);
+            CreateLayer(100, nOut);
+            
+            dataLoader = new DataLoader();
+            dataLoader->LoadMnistTrainingData("Training Data/Mnist/MnistTrainingData.txt", 50000, 784, 10);
+            dataLoader->LoadMnistValidationData("Training Data/Mnist/MnistValidationData.txt", 10000, 784, 1);
+            
+            Start();
+            SaveParameters("Saved/MnistParameters.txt");
+            break;
+            
+        case 2:
+            nIn = 32;
+            nOut = 2;
+            
+            inputs = new double[nIn];
+            outputs = new double[nOut];
+            
+            CreateLayer(nIn, 80);
+            CreateLayer(80, nOut);
+            
+            dataLoader = new DataLoader();
+            dataLoader->CreateDictionary("Training Data/Sentiment/TrainingData.txt");
+            dataLoader->LoadSentimentTrainingData("Training Data/Sentiment/TrainingData Reinforced.txt", 32, 2);
+            dataLoader->LoadSentimentValidationData("Training Data/Sentiment/ValidationData.txt", 32, 1);
+            
+            Start();
+            SaveParameters("Saved/SentimentAnalysisParameters.txt");
+            break;
+            
+        case 3:
+            break;
+            
+        default:
+            break;
     }
+    
 }
 
 bool FcNetwork::CreateLayer(int input, int output)
@@ -78,7 +84,7 @@ bool FcNetwork::CreateLayer(int input, int output)
     return hiddenLayer->CreateLayer(input, output);
 }
 
-    
+
 void FcNetwork::Start()
 {
     int choice;
@@ -96,7 +102,7 @@ void FcNetwork::Start()
             case 1:
                 std::cout << "Enter Training Parameters(Epochs, Batch Size, Learning Rate, Regularization Rate, Decay Rate, Early Stop):\n";
                 if(helpers::ParseParameters(parameters, 6))
-                AdaptiveTraining(int(parameters[0]), int(parameters[1]), parameters[2], parameters[3], parameters[4], int(parameters[5]));
+                    AdaptiveTraining(int(parameters[0]), int(parameters[1]), parameters[2], parameters[3], parameters[4], int(parameters[5]));
                 break;
             case 3:
                 LoadParameters("Saved/LastParameters.txt", hiddenLayer->CountParameters(), true);
@@ -165,7 +171,7 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
     double adaptiveLearningRate = learningRate;
     double originalValidationRate = 1.0;
     int overfittingCount = 0;
-
+    
     progress.clear();
     while (true)
     {

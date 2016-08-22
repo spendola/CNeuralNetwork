@@ -10,8 +10,8 @@
 #define OpenCvPlot_hpp
 
 #include <stdio.h>
-#include "opencv2/core.hpp"
-#include "opencv2/highgui.hpp"
+//#include "opencv2/core.hpp"
+//#include "opencv2/highgui.hpp"
 
 class OpenCvPlot
 {
