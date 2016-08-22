@@ -11,15 +11,13 @@
 
 #include <stdio.h>
 #include <iostream>
+#include "History.hpp"
 
 namespace helpers
 {
     void PrintArray(std::string label, double* data, int size);
-    
     bool ParseParameters(double* parameters, int size);
-    
     int ParseOutput(double* output, int size);
-    
     double Percentage(double part, double total);
 }
 

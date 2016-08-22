@@ -95,6 +95,7 @@ void FcNetwork::Start()
         std::cout << "1) Adaptive Network Training\n";
         std::cout << "2) Evaluate Network\n";
         std::cout << "3) Load Last Parameters\n";
+        std::cout << "4) Show History\n";
         std::cout << "9) Exit\n";
         std::cin >> choice;
         switch (choice)
@@ -104,8 +105,14 @@ void FcNetwork::Start()
                 if(helpers::ParseParameters(parameters, 6))
                     AdaptiveTraining(int(parameters[0]), int(parameters[1]), parameters[2], parameters[3], parameters[4], int(parameters[5]));
                 break;
+            case 2:
+                
+                break;
             case 3:
                 LoadParameters("Saved/LastParameters.txt", hiddenLayer->CountParameters(), true);
+                break;
+            case 4:
+                history::get();
                 break;
             default:
                 break;
@@ -142,8 +149,8 @@ double FcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate, d
             validationRate = EvaluateNetwork(false);
             progress.push_back(validationRate);
             validations += validationRate;
-            std::cout << "Epoch " << e << " Completed: lr: " << learningRate << ", cost: " << std::setprecision(4) << cost << ", ";
-            std::cout << "validation: " << validationRate << "%\n";
+            //std::cout << "Epoch " << e << " Completed: lr: " << learningRate << ", cost: " << std::setprecision(4) << cost << ", ";
+            //std::cout << "validation: " << validationRate << "%\n";
         }
         return validations/(double)epochs;
     }
@@ -219,7 +226,7 @@ void FcNetwork::SaveParameters(std::string path)
 
 void FcNetwork::LoadParameters(std::string path, int size, bool testValidation)
 {
-    std::cout << "Loading Parameters\n";
+    std::cout << "Loading Parameters: " << path << "\n";
     std::ifstream file (path, std::ios::binary);
     if(file.is_open())
     {

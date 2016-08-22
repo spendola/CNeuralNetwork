@@ -13,12 +13,11 @@
 
 int main(int argc, const char * argv[])
 {
-    // insert code here...
     std::cout << "Neural Network Manager\n";
     
     FcNetwork::FcNetwork* net = new FcNetwork::FcNetwork();
-
     delete(net);
+    
     return 0;
 }
 

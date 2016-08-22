@@ -34,7 +34,10 @@ namespace helpers
         }
         
         if(i == size)
+        {
+            history::set(str);
             return true;
+        }
         return false;
     }
     
@@ -58,4 +61,5 @@ namespace helpers
         return 100.0*(part/total);
     }
     
+
 }

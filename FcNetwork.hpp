@@ -21,6 +21,7 @@
 #include "DataLoader.hpp"
 #include "StopWatch.hpp"
 #include "Helpers.hpp"
+#include "History.hpp"
 
 class FcNetwork
 {
