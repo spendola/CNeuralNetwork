@@ -19,6 +19,7 @@
 #include <cmath>
 #include <sstream>
 #include "deque"
+#include "NeuralMath.hpp"
 
 class FcLayer
 {
@@ -30,13 +31,7 @@ private:
     double* biases;
     double* zethas;
     double* activations;
-    
-    
     FcLayer* nextLayer;
-    double QuadraticCost(double* x, double* y);
-    void QuadraticError(double* y, double* a, double* z);
-    double Sigmoid(double z);
-    double SigmoidPrime(double z);
     
 public:
     int nIn;

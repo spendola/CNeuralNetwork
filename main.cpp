@@ -7,17 +7,14 @@
 //
 
 #include <iostream>
-#include "FcNetwork.hpp"
-#include "CnvNetwork.hpp"
-
+#include "NetworkManager.hpp"
 
 int main(int argc, const char * argv[])
 {
-    std::cout << "Neural Network Manager\n";
+    NetworkManager* manager = new NetworkManager();
+    manager->Start();
     
-    FcNetwork::FcNetwork* net = new FcNetwork::FcNetwork();
-    delete(net);
-    
+    delete(manager);
     return 0;
 }
 

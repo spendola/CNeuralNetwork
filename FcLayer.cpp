@@ -75,7 +75,7 @@ double* FcLayer::FeedForward(double* in)
             wa += in[w] * weights[w+(n*nIn)];
         
         zethas[n] = wa + biases[n];
-        activations[n] = Sigmoid(zethas[n]);
+        activations[n] = neuralmath::sigmoid(zethas[n]);
     }
     
     if(nextLayer != NULL)
@@ -114,7 +114,7 @@ void FcLayer::BackPropagate(double* in, double* out)
             delta[i] = 0.0;
             for (int e=0; e<nextLayer->nOut; e++)
                 delta[i] += nextLayer->weights[i+(e*nextLayer->nOut)] * nextLayer->delta[e];
-            delta[i] = delta[i] * SigmoidPrime(zethas[i]);
+            delta[i] = delta[i] * neuralmath::sigmoidprime(zethas[i]);
             
             nabla_b[i] = delta[i];
             delta_nabla_b[i] += nabla_b[i];
@@ -145,35 +145,6 @@ void FcLayer::UpdateParameters(int batchSize, double learningRate, double lambda
                       -  ((learningRate/double(batchSize))*delta_nabla_w[i]);
         delta_nabla_w[i] = 0.0;
     }
-}
-
-
-
-double FcLayer::QuadraticCost(double* x, double* y)
-{
-    double distance = 0.0;
-    for (int i=0; i<nOut; i++)
-    {
-        distance += pow((x[i] - y[i]), 2.0);
-    }
-    return 0.5 * (pow(sqrt(distance), 2.0));
-}
-
-void FcLayer::QuadraticError(double* a, double* y, double* z)
-{
-    for(int i=0; i<nOut; i++)
-        delta[i] = (a[i] - y[i]) * SigmoidPrime(z[i]);
-}
-
-double FcLayer::Sigmoid(double z)
-{
-    return 1.0/(1.0+std::exp(-z));
-}
-
-double FcLayer::SigmoidPrime(double z)
-{
-    double sprime = Sigmoid(z);
-    return sprime*(1.0-sprime);
 }
 
 int FcLayer::CountParameters()

@@ -7,8 +7,6 @@
 //
 
 #include "FcNetwork.hpp"
-#include <iostream>
-#include <ctime>
 
 FcNetwork::FcNetwork()
 {
@@ -17,80 +15,36 @@ FcNetwork::FcNetwork()
     hiddenLayer = NULL;
     outputs = NULL;
     inputs = NULL;
-    dataLoader = NULL;
     
-    int choice = 0;    
-    std::cout << "\nChoose a Network Model\n";
-    std::cout << "1) Mnist Fully Connected Network\n";
-    std::cout << "2) Sentiment Analysis Fully Connected Network\n";
-    std::cout << "3) Exit\n";
-    std::cin >> choice;
-    
-    switch (choice)
-    {
-        case 1:
-            nIn = 784;
-            nOut = 10;
-            
-            inputs = new double[nIn];
-            outputs = new double[nOut];
-            
-            CreateLayer(nIn, 100);
-            CreateLayer(100, nOut);
-            
-            dataLoader = new DataLoader();
-            dataLoader->LoadMnistTrainingData("Training Data/Mnist/MnistTrainingData.txt", 50000, 784, 10);
-            dataLoader->LoadMnistValidationData("Training Data/Mnist/MnistValidationData.txt", 10000, 784, 1);
-            
-            Start();
-            SaveParameters("Saved/MnistParameters.txt");
-            break;
-            
-        case 2:
-            nIn = 32;
-            nOut = 2;
-            
-            inputs = new double[nIn];
-            outputs = new double[nOut];
-            
-            CreateLayer(nIn, 80);
-            CreateLayer(80, nOut);
-            
-            dataLoader = new DataLoader();
-            dataLoader->CreateDictionary("Training Data/Sentiment/TrainingData.txt");
-            dataLoader->LoadSentimentTrainingData("Training Data/Sentiment/TrainingData Reinforced.txt", 32, 2);
-            dataLoader->LoadSentimentValidationData("Training Data/Sentiment/ValidationData.txt", 32, 1);
-            
-            Start();
-            SaveParameters("Saved/SentimentAnalysisParameters.txt");
-            break;
-            
-        case 3:
-            break;
-            
-        default:
-            break;
-    }
-    
+    dataLoader = new DataLoader();
+}
+
+DataLoader* FcNetwork::GetDataLoader()
+{
+    return dataLoader;
 }
 
 bool FcNetwork::CreateLayer(int input, int output)
 {
     if (hiddenLayer == NULL)
     {
+        nIn = input;
+        nOut = output;
         hiddenLayer = new FcLayer(input, output);
         return true;
     }
+    nOut = output;
     return hiddenLayer->CreateLayer(input, output);
 }
 
-
 void FcNetwork::Start()
 {
-    int choice;
     double* parameters = new double[6];
+    inputs = new double[dataLoader->trainingSampleSize]();
+    outputs = new double[dataLoader->trainingLabelSize]();
     while(true)
     {
+        int choice = 0;
         std::cout << "\nChoose an Option\n";
         std::cout << "1) Adaptive Network Training\n";
         std::cout << "2) Evaluate Network\n";
@@ -117,8 +71,6 @@ void FcNetwork::Start()
             default:
                 break;
         }
-        if(choice == 9)
-            break;
     }
 }
 
@@ -136,21 +88,21 @@ double FcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate, d
             for (int i=0; i<batchSize; i++)
             {
                 dataLoader->GetRandomTrainingSample(inputs, outputs);
-                double* output = hiddenLayer->FeedForward(inputs);
                 
+                double* output = hiddenLayer->FeedForward(inputs);
                 hiddenLayer->BackPropagate(inputs, outputs);
-                cost += QuadraticCost(output, inputs, nOut);
+                
+                cost += neuralmath::quadraticcost(output, inputs, nOut);
             }
             
             hiddenLayer->UpdateParameters(batchSize, learningRate, lambda, dataLoader->numberOfTrainingSamples);
             cost = double(cost/batchSize);
             
             // Evaluate
-            validationRate = EvaluateNetwork(false);
-            progress.push_back(validationRate);
+            validationRate = EvaluateNetwork(validationRate > 90.0);
             validations += validationRate;
-            //std::cout << "Epoch " << e << " Completed: lr: " << learningRate << ", cost: " << std::setprecision(4) << cost << ", ";
-            //std::cout << "validation: " << validationRate << "%\n";
+            std::cout << "Epoch " << e << " Completed: lr: " << learningRate << ", cost: " << std::setprecision(4) << cost << ", ";
+            std::cout << "validation: " << validationRate << "%\n";
         }
         return validations/(double)epochs;
     }
@@ -160,40 +112,47 @@ double FcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate, d
 double FcNetwork::EvaluateNetwork(bool subSample)
 {
     int pass = 0;
-    int validationSamples = subSample ? dataLoader->numberOfValidationSamples/4 : dataLoader->numberOfValidationSamples;
+    int validationSamples = subSample ? dataLoader->numberOfValidationSamples/10 : dataLoader->numberOfValidationSamples;
     
     for (int i=0; i<validationSamples; i++)
     {
         dataLoader->GetValidationSample(subSample ? -1 : i, inputs, outputs);
-        dataLoader->GetRandomValidationSample(inputs, outputs);
         double* output = hiddenLayer->FeedForward(inputs);
-        pass += helpers::ParseOutput(output, nOut) ? 1.0 : 0.0;
+        pass += helpers::ParseOutput(output, nOut) == (int)outputs[0] ? 1.0 : 0.0;
     }
     return helpers::Percentage(pass, validationSamples);
 }
 
 
-void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate, double lambda, double decayRate, int earlyStop)
+void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate, double lambda, double decayRate, int loops)
 {
+    std::deque<double> progress;
+    OpenCvPlot plot;
+    int earlyStop = 10;
     double adaptiveLearningRate = learningRate;
     double originalValidationRate = 1.0;
     int overfittingCount = 0;
-    
+
     progress.clear();
-    while (true)
+    for (int i=0; i<loops; i++)
     {
         double currentValidationRate = TrainNetwork(epochs, batchSize, adaptiveLearningRate, lambda);
         double delta = ((currentValidationRate/originalValidationRate)-1.0) * 100;
-        std::cout << "\nCycle completed, average validation rate is  " << currentValidationRate << ", delta is " << delta << "%\n\n";
+        std::cout << "\nCycle completed, average validation rate is  " << currentValidationRate << "%, delta is " << delta << "%\n\n";
         
         overfittingCount = delta < 0.0 ? overfittingCount+1 : 0;
-        adaptiveLearningRate = overfittingCount > earlyStop ? adaptiveLearningRate * decayRate : adaptiveLearningRate;
-        if(overfittingCount > (earlyStop*2))
-            break;
+        if(overfittingCount > earlyStop)
+        {
+            adaptiveLearningRate = adaptiveLearningRate * decayRate;
+            overfittingCount = 0;
+        }
         
+        progress.push_back(currentValidationRate);
         originalValidationRate = currentValidationRate;
         SaveParameters("Saved/LastParameters.txt");
     }
+    plot.SimplePlot(&progress, 600, 1200);
+    
     std::cout << "Adaptive Training Finished\n";
     std::cout << "Learning Rate: " << learningRate << ", Regularization Rate: " << lambda << "\n";
 }
@@ -245,16 +204,6 @@ void FcNetwork::LoadParameters(std::string path, int size, bool testValidation)
     }
 }
 
-
-double FcNetwork::QuadraticCost(double* x, double* y, int size)
-{
-    double distance = 0.0;
-    for (int i=0; i<size; i++)
-    {
-        distance += pow((x[i] - y[i]), 2.0);
-    }
-    return 0.5 * (pow(sqrt(distance), 2.0));
-}
 
 
 FcNetwork::~FcNetwork()

@@ -12,6 +12,8 @@
 DataLoader::DataLoader()
 {
     std::cout << "Initializing DataLoader\n";
+    trainingData = NULL;
+    validationData = NULL;
     srand((unsigned)time(0));
 }
 
@@ -81,7 +83,7 @@ void DataLoader::LoadMnistTrainingData(std::string path, int sampleCount, int sa
 
 
 
-void DataLoader::CreateDictionary(std::string path)
+int DataLoader::CreateDictionary(std::string path)
 {
     std::string line;
     std::ifstream file (path);
@@ -90,7 +92,11 @@ void DataLoader::CreateDictionary(std::string path)
         std::cout << "Creating Dictionary\n";
         file.seekg(0, std::ios::beg);
         
-        int i = 1;
+        dictionary["start_token"] = 1;
+        dictionary["end_token"] = 2;
+        dictionary["unknown_token"] = 3;
+        
+        int i = (int)dictionary.size() + 1;
         while(getline(file, line))
         {
             std::stringstream ss(line.substr(2));
@@ -102,11 +108,62 @@ void DataLoader::CreateDictionary(std::string path)
             }
         }
         file.close();
+        dictionarySize = (int)dictionary.size();
         std::cout << dictionary.size() << " words added to dictionary\n";
+        return (int)dictionary.size();
     }
     else
     {
         std::cout << "Unable to open file\n";
+        return 0;
+    }
+}
+
+int DataLoader::CreateTokenizedDictionary(std::string path, int threshold)
+{
+    std::string line;
+    std::ifstream file (path);
+    std::map<std::string, int> temp;
+    if(file.is_open())
+    {
+        std::cout << "Creating Tokenized Dictionary\n";
+        file.seekg(0, std::ios::beg);
+        
+
+        while(getline(file, line))
+        {
+            std::stringstream ss(line.substr(2));
+            std::string token;
+            while(getline(ss, token, ' '))
+            {
+                if (temp.find(token.c_str()) == temp.end())
+                    temp[token.c_str()] = 1;
+                else
+                    temp[token.c_str()] = temp[token.c_str()] + 1;
+            }
+        }
+        file.close();
+        
+        dictionary["start_token"] = 1;
+        dictionary["end_token"] = 2;
+        dictionary["unknown_token"] = 3;
+        int i = (int)dictionary.size() + 1;
+        
+        for (std::map<std::string,int>::iterator it=temp.begin(); it!=temp.end(); ++it)
+        {
+            if(it->second > threshold)
+                dictionary[it->first] = i++;
+        }
+        
+        dictionarySize = (int)dictionary.size();
+        std::cout << temp.size() << " words found, " << temp.size() - dictionary.size() << " words excluded\n";
+        std::cout << dictionary.size() << " words added to dictionary\n";
+        return (int)dictionary.size();
+    }
+    else
+    {
+        std::cout << "Unable to open file\n";
+        return 0;
     }
 }
 
@@ -129,9 +186,16 @@ void DataLoader::LoadDictionary(std::string path)
     }
 }
 
+int DataLoader::GetFromDictionry(std::string word)
+{
+    if(dictionary.find(word.c_str()) != dictionary.end())
+        return dictionary[word.c_str()];
+    return dictionary["unknown_token"];
+}
+
 void DataLoader::LoadSentimentTrainingData(std::string path, int sampleSize, int labelSize)
 {
-    std::cout << "Loading Training Data: " << path << "\n";
+    std::cout << "Loading Sentiment Analysis Training Data: " << path << "\n";
     trainingSampleSize = sampleSize;
     trainingLabelSize = labelSize;
     numberOfTrainingSamples = 0;
@@ -159,12 +223,7 @@ void DataLoader::LoadSentimentTrainingData(std::string path, int sampleSize, int
             // Sample Data
             while(getline(ss, token, ' '))
             {
-                if(dictionary.find(token.c_str()) == dictionary.end())
-                    trainingData[(index*(trainingSampleSize + trainingLabelSize)) + i] = 0.001;
-                else
-                    trainingData[(index*(trainingSampleSize + trainingLabelSize)) + i] = double(dictionary[token] / 1000.0);
-                //*((double*)buffer);
-                i++;
+                trainingData[(index*(trainingSampleSize + trainingLabelSize))+i++] = double(GetFromDictionry(token) / 10000.0);
                 if (i == (sampleSize-1))
                     break;
             }
@@ -194,7 +253,7 @@ void DataLoader::LoadSentimentTrainingData(std::string path, int sampleSize, int
 
 void DataLoader::LoadSentimentValidationData(std::string path, int sampleSize, int labelSize)
 {
-    std::cout << "Loading Validation Data: " << path << "\n";
+    std::cout << "Loading Sentiment Analysis Validation Data: " << path << "\n";
     validationSampleSize = sampleSize;
     validationLabelSize = labelSize;
     numberOfValidationSamples = 0;
@@ -221,11 +280,7 @@ void DataLoader::LoadSentimentValidationData(std::string path, int sampleSize, i
             // Sample Data
             while(getline(ss, token, ' '))
             {
-                if(dictionary.find(token) == dictionary.end())
-                    validationData[(index*(validationSampleSize + validationLabelSize)) + (i++)] = 0.001;
-                else
-                    validationData[(index*(validationSampleSize + validationLabelSize)) + (i++)] = double(dictionary[token] / 1000.0);
-                
+                validationData[(index*(validationSampleSize + validationLabelSize))+i++] = double(GetFromDictionry(token) / 10000.0);
                 if (i == (sampleSize-1))
                     break;
             }
@@ -252,6 +307,52 @@ void DataLoader::LoadSentimentValidationData(std::string path, int sampleSize, i
 
 }
 
+void DataLoader::LoadLanguageModelTrainingData(std::string path, int sampleSize)
+{
+    std::cout << "Loading Language Modeling Training Data: " << path << "\n";
+    numberOfTrainingSamples = 0;
+    trainingSampleSize = sampleSize;
+    
+    std::string line;
+    std::ifstream file (path);
+    if(file.is_open())
+    {
+        std::deque<std::string> sentences;
+        while(getline(file, line))
+            numberOfTrainingSamples++;
+        
+        trainingData = new double[numberOfTrainingSamples * sampleSize]();
+        
+        file.clear();
+        file.seekg(0, std::ios::beg);
+        int index = 0;
+        
+        while(getline(file, line))
+        {
+            
+            std::stringstream ss(line.substr(2));
+            std::string token;
+            
+            trainingData[index*sampleSize] = dictionary["start_token"];
+            
+            int i = 1;
+            while(getline(ss, token, ' ') && i<(sampleSize-1))
+            {
+                trainingData[(index*sampleSize)+i++] = GetFromDictionry(token);
+            }
+            
+            trainingData[(index*sampleSize)+i] = dictionary["end_token"];
+            index++;
+        }
+        file.close();
+    }
+    else
+    {
+        std::cout << "Unable to open file " << path << "\n";
+    }
+    
+}
+
 int DataLoader::GetRandomTrainingSample(double* sample, double* label)
 {
     int randomSample = (rand() % numberOfTrainingSamples);
@@ -265,16 +366,32 @@ int DataLoader::GetRandomTrainingSample(double* sample, double* label)
     return randomSample;
 }
 
-void DataLoader::GetRandomValidationSample(double* sample, double* label)
+int DataLoader::GetLanguageTrainingSample(double* sample, double* expected)
 {
-    int randomSample = (rand() % numberOfValidationSamples);
-    GetValidationSample(randomSample, sample, label);
+    int randomSample = (rand() % numberOfTrainingSamples);
+    int sampleIndex = randomSample * (trainingSampleSize);
+    
+    int sentenceSize = 0;
+    for(int i=sampleIndex; i<(sampleIndex+trainingSampleSize); i++)
+    {
+        sentenceSize++;
+        if(trainingData[i] == dictionary["end_token"])
+            break;
+    }
+    
+    int sentenceCut = 1 + (rand() % (sentenceSize-1));
+    for(int i=0; i<sentenceCut; i++)
+    {
+        sample[i] = trainingData[i+sampleIndex];
+        expected[i] = trainingData[i+sampleIndex];
+    }
+    expected[sentenceCut] = trainingData[sentenceCut+sampleIndex];
+    return sentenceCut;
 }
 
 void DataLoader::GetValidationSample(int index, double* sample, double* label)
 {
-    int sampleIndex = index < 0 ? (rand() % numberOfValidationSamples) * (validationSampleSize+validationLabelSize)
-                        : index*(validationSampleSize+validationLabelSize);
+    int sampleIndex = index < 0 ? (rand() % numberOfValidationSamples) * (validationSampleSize+validationLabelSize) : index*(validationSampleSize+validationLabelSize);
     
     for(int i=0; i<validationSampleSize; i++)
         sample[i] = validationData[sampleIndex+i];

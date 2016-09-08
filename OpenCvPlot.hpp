@@ -10,8 +10,10 @@
 #define OpenCvPlot_hpp
 
 #include <stdio.h>
-//#include "opencv2/core.hpp"
-//#include "opencv2/highgui.hpp"
+#include <deque>
+
+#include "opencv2/core.hpp"
+#include "opencv2/highgui.hpp"
 
 class OpenCvPlot
 {
@@ -21,8 +23,8 @@ private:
 public:
     OpenCvPlot();
     ~OpenCvPlot();
-    void SimplePlot(double* data);
-    
+    void SimplePlot(std::deque<double>* data, int height, int width);
+    void SimplePlot(double* data, int points, int heigth, int width);
     
 };
 

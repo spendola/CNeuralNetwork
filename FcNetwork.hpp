@@ -16,12 +16,13 @@
 #include <iomanip>
 #include <cstring>
 #include <iostream>
+#include <ctime>
 #include "deque"
 #include "FcLayer.hpp"
 #include "DataLoader.hpp"
-#include "StopWatch.hpp"
-#include "Helpers.hpp"
-#include "History.hpp"
+#include "Common/StopWatch.hpp"
+#include "Common/Helpers.hpp"
+#include "OpenCvPlot.hpp"
 
 class FcNetwork
 {
@@ -31,15 +32,13 @@ private:
     int nOut;
     double* inputs;
     double* outputs;
+    
     FcLayer* hiddenLayer;
     DataLoader* dataLoader;
-    double QuadraticCost(double* x, double* y, int size);
-    int ParseOutput(double* output);
     
     void SaveProgress();
     void SaveParameters(std::string path);
     void LoadParameters(std::string path, int size, bool testValidation);
-    std::deque<double> progress;
     
 public:
     
@@ -47,6 +46,7 @@ public:
     ~FcNetwork();
     
     void Start();
+    DataLoader* GetDataLoader();
     bool CreateLayer(int input, int output);
     
     void AdaptiveTraining(int epochs, int batchSize, double learningRate, double lambda, double decayRate, int earlyStop);
