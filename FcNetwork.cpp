@@ -135,7 +135,10 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
     int overfittingCount = 0;
     
     if(publishNetworkStatus)
+    {
         remote::PublishMessage("Adaptive Training Started");
+        remote::PublishCommand("validationgraph");
+    }
 
     progress.clear();
     for (int i=0; i<loops; i++)

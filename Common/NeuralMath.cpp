@@ -44,6 +44,10 @@ namespace neuralmath
         for(int i=0; i<size; i++)
             sum += std::exp(z[i]);
         for(int i=0; i<size; i++)
+        {
             z[i] = std::exp(z[i])/sum;
+            if(z[i] != z[i])
+                z[i] = 0.0000001;
+        }
     }
 }

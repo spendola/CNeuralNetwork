@@ -48,7 +48,10 @@ void RcNetwork::Start(bool enablePublishStatus)
 double RcNetwork::TrainNetwork(int epochs, int batchSize)
 {
     if(publishNetworkStatus)
+    {
         remote::PublishMessage("Adaptive Training Started");
+        remote::PublishCommand("lossgraph");
+    }
     
     double Loss = 0.0;
     for(int epoch=0; epoch<epochs; epoch++)
