@@ -20,18 +20,21 @@ class NetworkManager
 {
     
 private:
-    int MainMenu();
+    
+    bool publishNetworkStatus;
+    
+    void MainMenu();
+    void OptionsMenu();
     void MnistFcNetwork();
     void SentAnalysisFcNetwork();
     void LangModelRcNetwork();
     void ListenForRemote();
+    void CleanTemporaryFiles();
     
 public:
     NetworkManager();
     ~NetworkManager();
     void Start();
-    
-
 };
 
 #endif /* NetworkManager_hpp */

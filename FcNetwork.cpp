@@ -37,8 +37,9 @@ bool FcNetwork::CreateLayer(int input, int output)
     return hiddenLayer->CreateLayer(input, output);
 }
 
-void FcNetwork::Start()
+void FcNetwork::Start(bool enablePublishStatus)
 {
+    publishNetworkStatus = enablePublishStatus;
     double* parameters = new double[6];
     inputs = new double[dataLoader->trainingSampleSize]();
     outputs = new double[dataLoader->trainingLabelSize]();
@@ -132,6 +133,9 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
     double adaptiveLearningRate = learningRate;
     double originalValidationRate = 1.0;
     int overfittingCount = 0;
+    
+    if(publishNetworkStatus)
+        remote::PublishMessage("Adaptive Training Started");
 
     progress.clear();
     for (int i=0; i<loops; i++)
@@ -139,6 +143,9 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
         double currentValidationRate = TrainNetwork(epochs, batchSize, adaptiveLearningRate, lambda);
         double delta = ((currentValidationRate/originalValidationRate)-1.0) * 100;
         std::cout << "\nCycle completed, average validation rate is  " << currentValidationRate << "%, delta is " << delta << "%\n\n";
+        
+        if(publishNetworkStatus)
+            remote::PublishValue(currentValidationRate);
         
         overfittingCount = delta < 0.0 ? overfittingCount+1 : 0;
         if(overfittingCount > earlyStop)
@@ -152,6 +159,9 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
         SaveParameters("Saved/LastParameters.txt");
     }
     plot.SimplePlot(&progress, 600, 1200);
+    
+    if(publishNetworkStatus)
+        remote::PublishMessage("Adaptive Training Finished");
     
     std::cout << "Adaptive Training Finished\n";
     std::cout << "Learning Rate: " << learningRate << ", Regularization Rate: " << lambda << "\n";

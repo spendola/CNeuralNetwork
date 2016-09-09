@@ -32,6 +32,7 @@ private:
     int nOut;
     double* inputs;
     double* outputs;
+    bool publishNetworkStatus;
     
     FcLayer* hiddenLayer;
     DataLoader* dataLoader;
@@ -45,7 +46,7 @@ public:
     FcNetwork();
     ~FcNetwork();
     
-    void Start();
+    void Start(bool enablePublishStatus);
     DataLoader* GetDataLoader();
     bool CreateLayer(int input, int output);
     

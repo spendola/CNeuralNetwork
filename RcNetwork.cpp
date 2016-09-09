@@ -37,15 +37,19 @@ DataLoader* RcNetwork::GetDataLoader()
     return dataLoader;
 }
 
-void RcNetwork::Start()
+void RcNetwork::Start(bool enablePublishStatus)
 {
     std::cout << "Starting Recurrent Neural Network\n";
+    publishNetworkStatus = enablePublishStatus;
     double loss = TrainNetwork(100, 30);
     std::cout << "Total Loss = " << loss << "\n";
 }
 
 double RcNetwork::TrainNetwork(int epochs, int batchSize)
 {
+    if(publishNetworkStatus)
+        remote::PublishMessage("Adaptive Training Started");
+    
     double Loss = 0.0;
     for(int epoch=0; epoch<epochs; epoch++)
     {
@@ -71,10 +75,12 @@ double RcNetwork::TrainNetwork(int epochs, int batchSize)
                 partialLoss += std::log(diff) * -1.0;
             }
             Loss += partialLoss/double(sentenceLength);
-            hiddenLayer->BackPropagate(sentenceLength, 5.0);
+            hiddenLayer->BackPropagate(sentenceLength, 0.1);
         }
         Loss = double(Loss / batchSize);
         std::cout << "Epoch completed: " << Loss << " average loss\n";
+        if(publishNetworkStatus)
+            remote::PublishValue(Loss);
     }
     return Loss;
 }

@@ -65,6 +65,8 @@ double* RcLayer::FeedForward(double* in, int wordsInSentence)
             
             stepActivation[((w+1)*nNeurons)+n] = std::tanh(stepActivation[((w+1)*nNeurons)+n] + prevActivation);
         }
+        if(helpers::CheckForNan(&stepActivation[(w+1)*nNeurons], nNeurons))
+            std::cout << "NAN\n";
     }
     
     // Propagate out of hidden layer
@@ -75,6 +77,14 @@ double* RcLayer::FeedForward(double* in, int wordsInSentence)
                 stepOutput[(w*nVocabulary)+v] += (stepActivation[((w+1)*nNeurons)+a] * weights_out[(v*nNeurons)+a]);
         
         neuralmath::softmax(&stepOutput[w*nVocabulary], nVocabulary);
+        
+        if(helpers::CheckForNan(&stepOutput[w*nVocabulary], nVocabulary))
+        {
+            helpers::PrintLabeledArray("StepOut After Softmax", &stepOutput[w*nVocabulary], nVocabulary);
+            helpers::PrintLabeledArray("StepActivation", &stepActivation[(w+1)*nNeurons], nNeurons);
+            helpers::PrintLabeledArray("StepActivation", weights_out, nVocabulary*nNeurons);
+            std::cout << "NAN\n";
+        }
     }
     return stepOutput;
 }

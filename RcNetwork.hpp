@@ -23,6 +23,7 @@ private:
     int nVocabulary;
     double* input;
     double* output;
+    bool publishNetworkStatus;
     
     RcLayer* hiddenLayer;
     DataLoader* dataLoader;
@@ -37,7 +38,7 @@ public:
     ~RcNetwork();
     DataLoader* GetDataLoader();
     
-    void Start();
+    void Start(bool enablePublishStatus);
     bool CreateHiddenLayer(int neurons, int vocabularySize);
     int PredictNextWord(double* input);
     
