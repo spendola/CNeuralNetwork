@@ -33,7 +33,9 @@ private:
     void LangModelRcNetwork();
     void ListenForRemote();
     void CleanTemporaryFiles();
+    
     void Print(std::string str);
+    void Publish(std::string str);
     std::vector<double> Fetch();
     
 public:

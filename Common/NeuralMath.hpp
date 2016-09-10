@@ -19,7 +19,6 @@ namespace neuralmath
     double tanh(double z);
     double fastsigmoid(double z);
     void softmax(double* z, int size);
-    
     double quadraticcost(double* x, double* y, int size);
 }
 

@@ -15,17 +15,20 @@
 #include <sstream>
 #include <iomanip>
 #include <vector>
-#include <curl/curl.h>
 
 namespace helpers
 {
     void PrintArray(std::string label, double* data, int size);
     void PrintArrayEx(std::string label, double* data, int size, int precision);
     void PrintLabeledArray(std::string label, double* data, int size);
+
+    std::string ToString(double value);
+    double Percentage(double part, double total);
+    
+    int ParseOutput(double* output, int size);
     bool ParseParameters(double* parameters, int size);
     std::vector<double> ParseInstruction(std::string instruction);
-    int ParseOutput(double* output, int size);
-    double Percentage(double part, double total);
+    
     bool CheckForNan(double* data, int size);
 }
 

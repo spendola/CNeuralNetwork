@@ -10,13 +10,14 @@
 
 NetworkManager::NetworkManager()
 {
-    Print("Neural Network Manager\n");
+    publishNetworkStatus = false;
     remoteApi = new RemoteApi();
+    Print("Neural Network Manager\n");
 }
 
 NetworkManager::~NetworkManager()
 {
-    
+    SafeDelete(remoteApi);
 }
 
 void NetworkManager::Start()
@@ -27,7 +28,7 @@ void NetworkManager::Start()
 
 void NetworkManager::MnistFcNetwork()
 {
-    Print("Starting Fully Connected Network for Mnist");
+    Publish("Starting Fully Connected Network for Mnist");
     FcNetwork* fcnet = new FcNetwork();
     fcnet->CreateLayer(784, 100);
     fcnet->CreateLayer(100, 10);
@@ -39,7 +40,7 @@ void NetworkManager::MnistFcNetwork()
 
 void NetworkManager::SentAnalysisFcNetwork()
 {
-    Print("Starting Fully Connected Network for Sentiment Analysis");
+    Publish("Starting Fully Connected Network for Sentiment Analysis");
     FcNetwork* fcnet = new FcNetwork();
     fcnet->CreateLayer(32, 128);
     fcnet->CreateLayer(128, 2);
@@ -52,7 +53,7 @@ void NetworkManager::SentAnalysisFcNetwork()
 
 void NetworkManager::LangModelRcNetwork()
 {
-    Print("Starting Recursive Network for Language Modeling");
+    Publish("Starting Recursive Network for Language Modeling");
     RcNetwork* rcnet = new RcNetwork();
     rcnet->GetDataLoader()->CreateTokenizedDictionary("Training Data/Sentiment/TrainingData Reinforced.txt", 1);
     rcnet->GetDataLoader()->LoadLanguageModelTrainingData("Training Data/Sentiment/TrainingData Reinforced.txt", 32);
@@ -155,10 +156,14 @@ void NetworkManager::OptionsMenu()
     }
 }
 
-
 void NetworkManager::Print(std::string str)
 {
-    std::cout << str << "\n";
+    std::cout << str;
+}
+
+void NetworkManager::Publish(std::string str)
+{
+    std::cout << str;
     if(publishNetworkStatus)
         remoteApi->PublishMessage(str);
 }

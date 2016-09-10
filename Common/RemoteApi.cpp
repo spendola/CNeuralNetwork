@@ -13,6 +13,11 @@ RemoteApi::RemoteApi()
     isEnabled = LoadRemoteAddress();
 }
 
+RemoteApi::~RemoteApi()
+{
+    
+}
+
 void RemoteApi::PublishMessage(std::string message)
 {
     if(!isEnabled) return;

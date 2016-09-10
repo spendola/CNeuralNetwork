@@ -10,7 +10,6 @@
 
 RcNetwork::RcNetwork()
 {
-    std::cout << "Initializing Recursive Neural Network\n";
     hiddenLayer = NULL;
     input = NULL;
     output = NULL;
@@ -40,18 +39,19 @@ DataLoader* RcNetwork::GetDataLoader()
 
 void RcNetwork::Start(bool enablePublishStatus)
 {
-    std::cout << "Starting Recurrent Neural Network\n";
+    Print("Starting Recurrent Neural Network");
     publishNetworkStatus = enablePublishStatus;
     double loss = TrainNetwork(100, 30);
-    std::cout << "Total Loss = " << loss << "\n";
+    Print("Total Loss = " + helpers::ToString(loss));
 }
 
 double RcNetwork::TrainNetwork(int epochs, int batchSize)
 {
+    Print("Adaptive Training Started on Recurrent Network");
     if(publishNetworkStatus)
     {
-        remoteApi->PublishMessage("Adaptive Training Started");
         remoteApi->PublishCommand("lossgraph");
+        remoteApi->PublishCommand("flushgraph");
     }
     
     double Loss = 0.0;
@@ -82,7 +82,7 @@ double RcNetwork::TrainNetwork(int epochs, int batchSize)
             hiddenLayer->BackPropagate(sentenceLength, 0.1);
         }
         Loss = double(Loss / batchSize);
-        std::cout << "Epoch completed: " << Loss << " average loss\n";
+        Print("Epoch completed: " + helpers::ToString(Loss) + " average loss");
         if(publishNetworkStatus)
             remoteApi->PublishValue(Loss);
     }
@@ -114,4 +114,16 @@ double* RcNetwork::VectorizeSample(double* sample, int length)
         vectorized[(i*nVocabulary)+int(sample[i])] = 1.0;
     
     return vectorized;
+}
+
+void RcNetwork::Print(std::string str)
+{
+    std::cout << str << "\n";
+}
+
+void RcNetwork::Publish(std::string str)
+{
+    std::cout << str << "\n";
+    if(publishNetworkStatus)
+        remoteApi->PublishMessage(str);
 }

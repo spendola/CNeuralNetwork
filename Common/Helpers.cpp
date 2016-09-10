@@ -87,6 +87,13 @@ namespace helpers
         return 100.0*(part/total);
     }
     
+    std::string ToString(double value)
+    {
+        std::stringstream ss;
+        ss << value;
+        return ss.str();
+    }
+    
     bool CheckForNan(double* data, int size)
     {
         for(int i=0; i<size; i++)

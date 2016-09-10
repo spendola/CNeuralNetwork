@@ -43,6 +43,9 @@ private:
     void SaveParameters(std::string path);
     void LoadParameters(std::string path, int size, bool testValidation);
     
+    void Print(std::string str);
+    void Publish(std::string str);
+    
 public:
     
     FcNetwork();

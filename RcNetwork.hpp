@@ -34,6 +34,8 @@ private:
     double CalculateLoss(double* input, double* output, int inputSize);
     double TrainNetwork(int epochs, int batchSize);
     
+    void Print(std::string str);
+    void Publish(std::string str);
     
 public:
     RcNetwork();

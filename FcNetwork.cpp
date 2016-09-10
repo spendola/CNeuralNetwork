@@ -10,7 +10,6 @@
 
 FcNetwork::FcNetwork()
 {
-    std::cout << "Initializing Fully Connected Network\n";
     srand((unsigned)time(0));
     hiddenLayer = NULL;
     outputs = NULL;
@@ -18,6 +17,15 @@ FcNetwork::FcNetwork()
     
     dataLoader = new DataLoader();
     remoteApi = new RemoteApi();
+}
+
+FcNetwork::~FcNetwork()
+{
+    SafeDelete(hiddenLayer);
+    SafeDelete(dataLoader);
+    SafeDelete(remoteApi);
+    SafeDeleteArray(inputs);
+    SafeDeleteArray(outputs);
 }
 
 DataLoader* FcNetwork::GetDataLoader()
@@ -47,17 +55,17 @@ void FcNetwork::Start(bool enablePublishStatus)
     while(true)
     {
         int choice = 0;
-        std::cout << "\nChoose an Option\n";
-        std::cout << "1) Adaptive Network Training\n";
-        std::cout << "2) Evaluate Network\n";
-        std::cout << "3) Load Last Parameters\n";
-        std::cout << "4) Show History\n";
-        std::cout << "9) Exit\n";
+        Print("\nChoose an Option\n");
+        Print("1) Adaptive Network Training\n");
+        Print("2) Evaluate Network\n");
+        Print("3) Load Last Parameters\n");
+        Print("4) Show History\n");
+        Print("9) Exit\n");
         std::cin >> choice;
         switch (choice)
         {
             case 1:
-                std::cout << "Enter Training Parameters(Epochs, Batch Size, Learning Rate, Regularization Rate, Decay Rate, Early Stop):\n";
+                Print("Enter Training Parameters(Epochs, Batch Size, Learning Rate, Regularization Rate, Decay Rate, Early Stop):\n");
                 if(helpers::ParseParameters(parameters, 6))
                     AdaptiveTraining(int(parameters[0]), int(parameters[1]), parameters[2], parameters[3], parameters[4], int(parameters[5]));
                 break;
@@ -135,10 +143,13 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
     double originalValidationRate = 1.0;
     int overfittingCount = 0;
     
+    Publish("Adaptive Training Started");
+    Publish("Learning Rate: " + std::to_string(learningRate) + ", Regularization: " + std::to_string(lambda));
+
     if(publishNetworkStatus)
     {
-        remoteApi->PublishMessage("Adaptive Training Started");
         remoteApi->PublishCommand("validationgraph");
+        remoteApi->PublishCommand("flushgraph");
     }
 
     progress.clear();
@@ -146,7 +157,8 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
     {
         double currentValidationRate = TrainNetwork(epochs, batchSize, adaptiveLearningRate, lambda);
         double delta = ((currentValidationRate/originalValidationRate)-1.0) * 100;
-        std::cout << "\nCycle completed, average validation rate is  " << currentValidationRate << "%, delta is " << delta << "%\n\n";
+        Print("\nCycle completed, average validation rate is  " + helpers::ToString(currentValidationRate) +
+              "%, delta is " + helpers::ToString(delta) + "%\n\n");
         
         if(publishNetworkStatus)
             remoteApi->PublishValue(currentValidationRate);
@@ -221,13 +233,15 @@ void FcNetwork::LoadParameters(std::string path, int size, bool testValidation)
     }
 }
 
-
-
-FcNetwork::~FcNetwork()
+void FcNetwork::Print(std::string str)
 {
-    std::cout << "Cleaning up Fully Connected Network\n";
-    SafeDelete(hiddenLayer);
-    SafeDelete(dataLoader);
-    SafeDeleteArray(inputs);
-    SafeDeleteArray(outputs);
+    std::cout << str;
 }
+
+void FcNetwork::Publish(std::string str)
+{
+    std::cout << str << "\n";
+    if(publishNetworkStatus)
+        remoteApi->PublishMessage(str);
+}
+
