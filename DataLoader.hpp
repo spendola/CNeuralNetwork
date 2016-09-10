@@ -18,6 +18,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <vector>
 #include <map>
 #include <deque>
 
@@ -26,10 +27,9 @@ class DataLoader
 private:
 
     double* trainingData;
-    
-
     double* validationData;
     
+    std::vector<std::string> stopwords;
     std::map<std::string, int> dictionary;
     
 public:
@@ -48,8 +48,10 @@ public:
     void LoadMnistValidationData(std::string path, int sampleCount, int sampleSize, int labelSize);
     
     // Sentiment Data
+    
     int CreateDictionary(std::string path);
     int CreateTokenizedDictionary(std::string path, int threshold);
+    void LoadStopWords(std::string path);
     void LoadDictionary(std::string path);
     int GetFromDictionry(std::string word);
     void LoadSentimentTrainingData(std::string path, int sampleSize, int labelSize);
