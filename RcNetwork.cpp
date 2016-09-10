@@ -15,6 +15,7 @@ RcNetwork::RcNetwork()
     input = NULL;
     output = NULL;
     dataLoader = new DataLoader();
+    remoteApi = new RemoteApi();
 }
 
 RcNetwork::~RcNetwork()
@@ -49,8 +50,8 @@ double RcNetwork::TrainNetwork(int epochs, int batchSize)
 {
     if(publishNetworkStatus)
     {
-        remote::PublishMessage("Adaptive Training Started");
-        remote::PublishCommand("lossgraph");
+        remoteApi->PublishMessage("Adaptive Training Started");
+        remoteApi->PublishCommand("lossgraph");
     }
     
     double Loss = 0.0;
@@ -83,7 +84,7 @@ double RcNetwork::TrainNetwork(int epochs, int batchSize)
         Loss = double(Loss / batchSize);
         std::cout << "Epoch completed: " << Loss << " average loss\n";
         if(publishNetworkStatus)
-            remote::PublishValue(Loss);
+            remoteApi->PublishValue(Loss);
     }
     return Loss;
 }

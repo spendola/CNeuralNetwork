@@ -20,6 +20,7 @@
 #include "deque"
 #include "FcLayer.hpp"
 #include "DataLoader.hpp"
+#include "RemoteApi.hpp"
 #include "Common/StopWatch.hpp"
 #include "Common/Helpers.hpp"
 #include "OpenCvPlot.hpp"
@@ -36,6 +37,7 @@ private:
     
     FcLayer* hiddenLayer;
     DataLoader* dataLoader;
+    RemoteApi* remoteApi;
     
     void SaveProgress();
     void SaveParameters(std::string path);

@@ -12,7 +12,9 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
+#include <vector>
 #include <curl/curl.h>
 
 namespace helpers
@@ -21,6 +23,7 @@ namespace helpers
     void PrintArrayEx(std::string label, double* data, int size, int precision);
     void PrintLabeledArray(std::string label, double* data, int size);
     bool ParseParameters(double* parameters, int size);
+    std::vector<double> ParseInstruction(std::string instruction);
     int ParseOutput(double* output, int size);
     double Percentage(double part, double total);
     bool CheckForNan(double* data, int size);
@@ -31,16 +34,6 @@ namespace history
     void set(std::string);
     void get();
     void get(std::string);
-}
-
-namespace remote
-{
-    void PublishMessage(std::string message);
-    void PublishValue(double value);
-    void PublishCommand(std::string message);
-    std::string FetchMessage(std::string remote);
-    std::tuple<std::string, std::string, std::string> LoadRemoteAddress();
-    size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
 }
 
 #endif /* Helpers_hpp */

@@ -72,6 +72,16 @@ namespace helpers
         return maxIndex;
     }
     
+    std::vector<double> ParseInstruction(std::string instruction)
+    {
+        std::vector<double> output;
+        std::stringstream ss(instruction);
+        std::string token;
+        while(getline(ss, token, ','))
+            output.push_back(atof(token.c_str()));
+        return output;
+    }
+    
     double Percentage(double part, double total)
     {
         return 100.0*(part/total);
@@ -137,128 +147,4 @@ namespace history
             std::cout << "Unable to open file\n";
         }
     }
-}
-
-namespace remote
-{
-    void PublishMessage(std::string message)
-    {
-        CURL *curl;
-        CURLcode res;
-        curl = curl_easy_init();
-        
-        std::tuple<std::string, std::string, std::string> remote = LoadRemoteAddress();
-        message = std::get<0>(remote) + curl_easy_escape(curl, message.c_str(), (int)message.length());
-        if(curl)
-        {
-            curl_easy_setopt(curl, CURLOPT_URL, message.c_str());
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-            
-            res = curl_easy_perform(curl);
-            if(res != CURLE_OK)
-                fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
-            
-            curl_easy_cleanup(curl);
-        }
-    }
-    
-    void PublishValue(double value)
-    {
-        CURL *curl;
-        CURLcode res;
-        curl = curl_easy_init();
-        
-        std::tuple<std::string, std::string, std::string> remote = LoadRemoteAddress();
-        std::string strValue = std::to_string(value);
-        std::string message = std::get<1>(remote) + curl_easy_escape(curl, strValue.c_str(), (int)strValue.length());
-        
-        if(curl)
-        {
-            curl_easy_setopt(curl, CURLOPT_URL, message.c_str());
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-            
-            res = curl_easy_perform(curl);
-            if(res != CURLE_OK)
-                fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
-            
-            curl_easy_cleanup(curl);
-        }
-    }
-    
-    void PublishCommand(std::string message)
-    {
-        CURL *curl;
-        CURLcode res;
-        curl = curl_easy_init();
-        
-        std::tuple<std::string, std::string, std::string> remote = LoadRemoteAddress();
-        message = std::get<2>(remote) + curl_easy_escape(curl, message.c_str(), (int)message.length());
-        if(curl)
-        {
-            curl_easy_setopt(curl, CURLOPT_URL, message.c_str());
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-            
-            res = curl_easy_perform(curl);
-            if(res != CURLE_OK)
-                fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
-            
-            curl_easy_cleanup(curl);
-        }
-    }
-    
-    std::string FetchMessage(std::string remote)
-    {
-        CURL *curl;
-        CURLcode res;
-        
-        curl = curl_easy_init();
-        if(curl)
-        {
-            curl_easy_setopt(curl, CURLOPT_URL, remote.c_str());
-            /* example.com is redirected, so we tell libcurl to follow redirection */
-            curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-            
-            /* Perform the request, res will get the return code */
-            res = curl_easy_perform(curl);
-            /* Check for errors */
-            if(res != CURLE_OK)
-                fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
-            
-            /* always cleanup */
-            curl_easy_cleanup(curl);
-            
-            return std::string(curl_easy_strerror(res));
-        }
-        return NULL;
-    }
-    
-    std::tuple<std::string, std::string, std::string> LoadRemoteAddress()
-    {
-        std::string messagePath;
-        std::string valuePath;
-        std::string commandPath;
-        std::ifstream file ("remote.txt");
-        if(file.is_open())
-        {
-            getline(file, messagePath);
-            getline(file, valuePath);
-            getline(file, commandPath);
-            file.close();
-        }
-        else
-        {
-            std::cout << "Unable to open file\n";
-        }
-        
-        return std::make_tuple(messagePath, valuePath, commandPath);
-    }
-    
-    size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp)
-    {
-        return size * nmemb;
-    }
-    
 }

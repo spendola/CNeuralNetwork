@@ -10,7 +10,8 @@
 
 NetworkManager::NetworkManager()
 {
-    std::cout << "Neural Network Manager\n";
+    Print("Neural Network Manager\n");
+    remoteApi = new RemoteApi();
 }
 
 NetworkManager::~NetworkManager()
@@ -26,8 +27,7 @@ void NetworkManager::Start()
 
 void NetworkManager::MnistFcNetwork()
 {
-    if(publishNetworkStatus)
-        remote::PublishMessage("Starting Fully Connected Network for Mnist");
+    Print("Starting Fully Connected Network for Mnist");
     FcNetwork* fcnet = new FcNetwork();
     fcnet->CreateLayer(784, 100);
     fcnet->CreateLayer(100, 10);
@@ -39,8 +39,7 @@ void NetworkManager::MnistFcNetwork()
 
 void NetworkManager::SentAnalysisFcNetwork()
 {
-    if(publishNetworkStatus)
-        remote::PublishMessage("Starting Fully Connected Network for Sentiment Analysis");
+    Print("Starting Fully Connected Network for Sentiment Analysis");
     FcNetwork* fcnet = new FcNetwork();
     fcnet->CreateLayer(32, 128);
     fcnet->CreateLayer(128, 2);
@@ -53,8 +52,7 @@ void NetworkManager::SentAnalysisFcNetwork()
 
 void NetworkManager::LangModelRcNetwork()
 {
-    if(publishNetworkStatus)
-        remote::PublishMessage("Starting Recursive Network for Language Modeling");
+    Print("Starting Recursive Network for Language Modeling");
     RcNetwork* rcnet = new RcNetwork();
     rcnet->GetDataLoader()->CreateTokenizedDictionary("Training Data/Sentiment/TrainingData Reinforced.txt", 1);
     rcnet->GetDataLoader()->LoadLanguageModelTrainingData("Training Data/Sentiment/TrainingData Reinforced.txt", 32);
@@ -67,7 +65,22 @@ void NetworkManager::ListenForRemote()
 {
     while(true)
     {
-        std::string dto = remote::FetchMessage("");
+        std::string message = remoteApi->FetchMessage();
+        std::vector<double> instruction = helpers::ParseInstruction(message);
+        
+        switch ((int)instruction[0])
+        {
+            case 1:
+                MnistFcNetwork();
+                break;
+            case 2:
+                SentAnalysisFcNetwork();
+                break;
+            case 3:
+                LangModelRcNetwork();
+                break;
+        }
+        sleep(1);
     }
 }
 
@@ -82,12 +95,12 @@ void NetworkManager::MainMenu()
     bool finished = false;
     while(!finished)
     {
-        std::cout << "\nMain Menu\n";
-        std::cout << "1) Mnist Fully Connected Network\n";
-        std::cout << "2) Sentiment Analysis Fully Connected Network\n";
-        std::cout << "3) Language Modeling Recursive Network\n";
-        std::cout << "4) Options\n";
-        std::cout << "9) Exit\n";
+        Print("\nMain Menu\n");
+        Print("1) Mnist Fully Connected Network\n");
+        Print("2) Sentiment Analysis Fully Connected Network\n");
+        Print("3) Language Modeling Recursive Network\n");
+        Print("4) Options\n");
+        Print("9) Exit\n");
         std::cin >> choice;
         
         switch(choice)
@@ -117,24 +130,22 @@ void NetworkManager::MainMenu()
 void NetworkManager::OptionsMenu()
 {
     int choice = 0;
-    std::cout << "\nOptions Menu\n";
-    std::cout << "1) Publish Network Status\n";
-    std::cout << "2) Listen For Remote Commands\n";
-    std::cout << "3) Clean Temporary Files\n";
-    std::cout << "9) Exit\n";
+    Print("\nOptions Menu\n");
+    Print("1) Publish Network Status\n");
+    Print("2) Listen For Remote Commands\n");
+    Print("3) Clean Temporary Files\n");
+    Print("9) Exit\n");
     std::cin >> choice;
     
     switch(choice)
     {
         case 1:
             publishNetworkStatus = !publishNetworkStatus;
-            if(publishNetworkStatus)
-                remote::PublishCommand("flushmessages");
-            std::cout << (publishNetworkStatus ? "Publish Network Status Enabled\n" : "Publish Network Status Disabled\n");
-            
+            Print(publishNetworkStatus ? "Publish Network Status Enabled\n" : "Publish Network Status Disabled\n");
             break;
         case 2:
-            ListenForRemote();
+            subscribeToRemote = !subscribeToRemote;
+            Print(subscribeToRemote ? "Subscribe To Remote Api Enabled\n" : "Subscribe To Remote Api Disabled\n");
             break;
         case 3:
             CleanTemporaryFiles();
@@ -142,4 +153,28 @@ void NetworkManager::OptionsMenu()
         default:
             break;
     }
+}
+
+
+void NetworkManager::Print(std::string str)
+{
+    std::cout << str << "\n";
+    if(publishNetworkStatus)
+        remoteApi->PublishMessage(str);
+}
+
+std::vector<double> NetworkManager::Fetch()
+{
+    if(subscribeToRemote)
+    {
+        std::string instruction = remoteApi->FetchMessage();
+        if(instruction.length() > 0)
+            return helpers::ParseInstruction(instruction);
+    }
+    
+    int input = 0;
+    std::cin >> input;
+    std::vector<double> output;
+    output.push_back(input);
+    return output;
 }

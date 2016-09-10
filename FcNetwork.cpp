@@ -17,6 +17,7 @@ FcNetwork::FcNetwork()
     inputs = NULL;
     
     dataLoader = new DataLoader();
+    remoteApi = new RemoteApi();
 }
 
 DataLoader* FcNetwork::GetDataLoader()
@@ -136,8 +137,8 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
     
     if(publishNetworkStatus)
     {
-        remote::PublishMessage("Adaptive Training Started");
-        remote::PublishCommand("validationgraph");
+        remoteApi->PublishMessage("Adaptive Training Started");
+        remoteApi->PublishCommand("validationgraph");
     }
 
     progress.clear();
@@ -148,8 +149,10 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
         std::cout << "\nCycle completed, average validation rate is  " << currentValidationRate << "%, delta is " << delta << "%\n\n";
         
         if(publishNetworkStatus)
-            remote::PublishValue(currentValidationRate);
-        
+            remoteApi->PublishValue(currentValidationRate);
+        else
+            progress.push_back(currentValidationRate);
+    
         overfittingCount = delta < 0.0 ? overfittingCount+1 : 0;
         if(overfittingCount > earlyStop)
         {
@@ -157,14 +160,15 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
             overfittingCount = 0;
         }
         
-        progress.push_back(currentValidationRate);
         originalValidationRate = currentValidationRate;
         SaveParameters("Saved/LastParameters.txt");
     }
-    plot.SimplePlot(&progress, 600, 1200);
+    
     
     if(publishNetworkStatus)
-        remote::PublishMessage("Adaptive Training Finished");
+        remoteApi->PublishMessage("Adaptive Training Finished");
+    else
+        plot.SimplePlot(&progress, 600, 1200);
     
     std::cout << "Adaptive Training Finished\n";
     std::cout << "Learning Rate: " << learningRate << ", Regularization Rate: " << lambda << "\n";

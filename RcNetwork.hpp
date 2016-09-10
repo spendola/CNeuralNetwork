@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include "DataLoader.hpp"
 #include "RcLayer.hpp"
+#include "RemoteApi.hpp"
 #include "Common/Helpers.hpp"
 
 class RcNetwork
@@ -27,6 +28,7 @@ private:
     
     RcLayer* hiddenLayer;
     DataLoader* dataLoader;
+    RemoteApi* remoteApi;
     
     double* VectorizeSample(double* sample, int length);
     double CalculateLoss(double* input, double* output, int inputSize);

@@ -11,17 +11,20 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <unistd.h>
 #include "FcNetwork.hpp"
 #include "CnvNetwork.hpp"
 #include "RcNetwork.hpp"
+#include "RemoteApi.hpp"
 #include "Common/Helpers.hpp"
 
 class NetworkManager
 {
     
 private:
-    
+    RemoteApi* remoteApi;
     bool publishNetworkStatus;
+    bool subscribeToRemote;
     
     void MainMenu();
     void OptionsMenu();
@@ -30,6 +33,8 @@ private:
     void LangModelRcNetwork();
     void ListenForRemote();
     void CleanTemporaryFiles();
+    void Print(std::string str);
+    std::vector<double> Fetch();
     
 public:
     NetworkManager();
