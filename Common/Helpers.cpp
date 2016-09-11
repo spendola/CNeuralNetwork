@@ -82,6 +82,21 @@ namespace helpers
         return output;
     }
     
+    std::string GetTime()
+    {
+        time_t rawtime;
+        struct tm * timeinfo;
+        char buffer [80];
+        
+        time (&rawtime);
+        timeinfo = localtime (&rawtime);
+        
+        strftime (buffer,80,"%F %I:%M%p",timeinfo);
+        puts (buffer);
+        
+        return buffer;
+    }
+    
     double Percentage(double part, double total)
     {
         return 100.0*(part/total);
@@ -102,6 +117,45 @@ namespace helpers
         return false;
     }
     
+    std::string SelectFile(std::string path, std::string suffix)
+    {
+        int choice;
+        DIR *d;
+        struct dirent *dir;
+        std::vector<std::string> files;
+        d = opendir(path.c_str());
+        if (d)
+        {
+            while ((dir = readdir(d)) != NULL)
+            {
+                std::string file = dir->d_name;
+                if(file.size() >= suffix.size() && file.compare(file.size() - suffix.size(), suffix.size(), suffix) == 0)
+                    files.push_back(file);
+            }
+            closedir(d);
+        }
+        
+        for(int i=0; i<files.size(); i++)
+            std::cout << i << " - " << files[i] << "\n";
+        std::cout << "choose a file: ";
+        choice = SafeCin();
+        
+        return path + files[choice];
+    }
+    
+    int SafeCin()
+    {
+        int n;
+        std::cin >> n;
+        if(!std::cin)
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            return 0;
+        }
+        return n;
+    }
+    
 }
 
 namespace history
@@ -109,7 +163,7 @@ namespace history
     void set(std::string str)
     {
         std::ofstream writer;
-        writer.open ("Saved/History.txt", std::ios::app);
+        writer.open ("../Configuration/History.txt", std::ios::app);
         if(writer.is_open())
         {
             writer << str;
@@ -121,7 +175,7 @@ namespace history
     void get()
     {
         std::string line;
-        std::ifstream file ("Saved/History.txt");
+        std::ifstream file ("../Configuration/History.txt");
         if(file.is_open())
         {
             while(getline(file, line))
@@ -139,7 +193,7 @@ namespace history
     void get(std::string str)
     {
         std::string line;
-        std::ifstream file ("Saved/History.txt");
+        std::ifstream file ("../Configuration/History.txt");
         if(file.is_open())
         {
             while(getline(file, line))

@@ -115,7 +115,7 @@ std::string RemoteApi::FetchMessage()
 
 bool RemoteApi::LoadRemoteAddress()
 {
-    std::ifstream file ("remote.txt");
+    std::ifstream file ("../Configuration/remote.txt");
     if(file.is_open())
     {
         getline(file, messagePath);

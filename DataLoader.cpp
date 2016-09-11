@@ -265,7 +265,6 @@ void DataLoader::LoadSentimentTrainingData(std::string path, int sampleSize, int
             index++;
         }
         
-        
         if(index != numberOfTrainingSamples)
             std::cout << "Expected number of values is different from actual number of values loaded\n";
         else

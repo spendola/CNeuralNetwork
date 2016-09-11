@@ -15,6 +15,7 @@
 #include <sstream>
 #include <iomanip>
 #include <vector>
+#include "dirent.h"
 
 namespace helpers
 {
@@ -22,6 +23,7 @@ namespace helpers
     void PrintArrayEx(std::string label, double* data, int size, int precision);
     void PrintLabeledArray(std::string label, double* data, int size);
 
+    std::string GetTime();
     std::string ToString(double value);
     double Percentage(double part, double total);
     
@@ -30,6 +32,9 @@ namespace helpers
     std::vector<double> ParseInstruction(std::string instruction);
     
     bool CheckForNan(double* data, int size);
+    
+    std::string SelectFile(std::string path, std::string suffix);
+    int SafeCin();
 }
 
 namespace history

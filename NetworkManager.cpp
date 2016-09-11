@@ -32,8 +32,8 @@ void NetworkManager::MnistFcNetwork()
     FcNetwork* fcnet = new FcNetwork();
     fcnet->CreateLayer(784, 100);
     fcnet->CreateLayer(100, 10);
-    fcnet->GetDataLoader()->LoadMnistTrainingData("Training Data/Mnist/MnistTrainingData.txt", 50000, 784, 10);
-    fcnet->GetDataLoader()->LoadMnistValidationData("Training Data/Mnist/MnistValidationData.txt", 10000, 784, 1);
+    fcnet->GetDataLoader()->LoadMnistTrainingData("../Training Data/Mnist/MnistTrainingData.txt", 50000, 784, 10);
+    fcnet->GetDataLoader()->LoadMnistValidationData("../Training Data/Mnist/MnistValidationData.txt", 10000, 784, 1);
     fcnet->Start(publishNetworkStatus);
     SafeDelete(fcnet);
 }
@@ -44,10 +44,10 @@ void NetworkManager::SentAnalysisFcNetwork()
     FcNetwork* fcnet = new FcNetwork();
     fcnet->CreateLayer(32, 128);
     fcnet->CreateLayer(128, 2);
-    fcnet->GetDataLoader()->LoadStopWords("Training Data/Sentiment/stopwords_en.txt");
-    fcnet->GetDataLoader()->CreateTokenizedDictionary("Training Data/Sentiment/TrainingData 65k.txt", 1);
-    fcnet->GetDataLoader()->LoadSentimentTrainingData("Training Data/Sentiment/TrainingData 65k.txt", 32, 2);
-    fcnet->GetDataLoader()->LoadSentimentValidationData("Training Data/Sentiment/ValidationData.txt", 32, 1);
+    fcnet->GetDataLoader()->LoadStopWords("../Training Data/Sentiment/stopwords_en.txt");
+    fcnet->GetDataLoader()->CreateTokenizedDictionary("../Training Data/Sentiment/TrainingData 65k.txt", 1);
+    fcnet->GetDataLoader()->LoadSentimentTrainingData("../Training Data/Sentiment/TrainingData 65k.txt", 32, 2);
+    fcnet->GetDataLoader()->LoadSentimentValidationData("../Training Data/Sentiment/ValidationData.txt", 32, 1);
     fcnet->Start(publishNetworkStatus);
     SafeDelete(fcnet);
 }
@@ -56,8 +56,8 @@ void NetworkManager::LangModelRcNetwork()
 {
     Publish("Starting Recursive Network for Language Modeling");
     RcNetwork* rcnet = new RcNetwork();
-    rcnet->GetDataLoader()->CreateTokenizedDictionary("Training Data/Sentiment/TrainingData Reinforced.txt", 1);
-    rcnet->GetDataLoader()->LoadLanguageModelTrainingData("Training Data/Sentiment/TrainingData Reinforced.txt", 32);
+    rcnet->GetDataLoader()->CreateTokenizedDictionary("../Training Data/Sentiment/TrainingData Reinforced.txt", 1);
+    rcnet->GetDataLoader()->LoadLanguageModelTrainingData("../Training Data/Sentiment/TrainingData Reinforced.txt", 32);
     rcnet->CreateHiddenLayer(100, rcnet->GetDataLoader()->dictionarySize);
     rcnet->Start(publishNetworkStatus);
     SafeDelete(rcnet);

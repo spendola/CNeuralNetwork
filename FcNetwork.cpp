@@ -58,7 +58,7 @@ void FcNetwork::Start(bool enablePublishStatus)
         Print("\nChoose an Option\n");
         Print("1) Adaptive Network Training\n");
         Print("2) Evaluate Network\n");
-        Print("3) Load Last Parameters\n");
+        Print("3) Load Parameters\n");
         Print("4) Show History\n");
         Print("9) Exit\n");
         std::cin >> choice;
@@ -73,7 +73,7 @@ void FcNetwork::Start(bool enablePublishStatus)
                 
                 break;
             case 3:
-                LoadParameters("Saved/LastParameters.txt", hiddenLayer->CountParameters(), true);
+                LoadParameters(helpers::SelectFile("../Saved/", ".txt"), hiddenLayer->CountParameters(), true);
                 break;
             case 4:
                 history::get();
@@ -142,6 +142,7 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
     double adaptiveLearningRate = learningRate;
     double originalValidationRate = 1.0;
     int overfittingCount = 0;
+    std::string startTime = helpers::GetTime();
     
     Publish("Adaptive Training Started");
     Publish("Learning Rate: " + std::to_string(learningRate) + ", Regularization: " + std::to_string(lambda));
@@ -173,17 +174,12 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
         }
         
         originalValidationRate = currentValidationRate;
-        SaveParameters("Saved/LastParameters.txt");
+        SaveParameters("../Saved/Training on " + startTime + ".txt");
     }
     
-    
-    if(publishNetworkStatus)
-        remoteApi->PublishMessage("Adaptive Training Finished");
-    else
+    Publish("Adaptive Training Finished");
+    if(!publishNetworkStatus)
         plot.SimplePlot(&progress, 600, 1200);
-    
-    std::cout << "Adaptive Training Finished\n";
-    std::cout << "Learning Rate: " << learningRate << ", Regularization Rate: " << lambda << "\n";
 }
 
 
@@ -193,7 +189,7 @@ void FcNetwork::SaveParameters(std::string path)
     if(hiddenLayer != NULL)
     {
         hiddenLayer->SaveParameters(&parameters);
-        std::cout << "Saving Parameters (" << parameters.size() << " parameters found)\n";
+        Print("Saving parameters (" + helpers::ToString(parameters.size()) + " parameters found)");
         if(parameters.size() > 0)
         {
             std::ofstream writer;
@@ -214,7 +210,8 @@ void FcNetwork::SaveParameters(std::string path)
 
 void FcNetwork::LoadParameters(std::string path, int size, bool testValidation)
 {
-    std::cout << "Loading Parameters: " << path << "\n";
+    Print("Loading parameters from " + path);
+    
     std::ifstream file (path, std::ios::binary);
     if(file.is_open())
     {
@@ -231,6 +228,11 @@ void FcNetwork::LoadParameters(std::string path, int size, bool testValidation)
             hiddenLayer->LoadParameters(parameters, 0);
         std::cout << "Validation: " << EvaluateNetwork(false) << "%\n";
     }
+    else
+    {
+        Print("ERROR: Unable to open file");
+    }
+    
 }
 
 void FcNetwork::Print(std::string str)
