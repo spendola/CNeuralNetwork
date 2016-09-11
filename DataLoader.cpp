@@ -132,8 +132,8 @@ int DataLoader::CreateTokenizedDictionary(std::string path, int threshold)
 
         while(getline(file, line))
         {
-            std::stringstream ss(line.substr(2));
             std::transform(line.begin(), line.end(), line.begin(), ::tolower);
+            std::stringstream ss(line.substr(2));
             std::string token;
             while(getline(ss, token, ' '))
             {
@@ -241,8 +241,8 @@ void DataLoader::LoadSentimentTrainingData(std::string path, int sampleSize, int
         while(getline(file, line))
         {
             int i = 0;
-            std::stringstream ss(line.substr(2));
             std::transform(line.begin(), line.end(), line.begin(), ::tolower);
+            std::stringstream ss(line.substr(2));
             std::string token;
             
             // Sample Data
@@ -301,6 +301,7 @@ void DataLoader::LoadSentimentValidationData(std::string path, int sampleSize, i
         while(getline(file, line))
         {
             int i = 0;
+            std::transform(line.begin(), line.end(), line.begin(), ::tolower);
             std::stringstream ss(line.substr(2));
             std::string token;
             
@@ -359,7 +360,7 @@ void DataLoader::LoadLanguageModelTrainingData(std::string path, int sampleSize)
         
         while(getline(file, line))
         {
-            
+            std::transform(line.begin(), line.end(), line.begin(), ::tolower);
             std::stringstream ss(line.substr(2));
             std::string token;
             

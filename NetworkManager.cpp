@@ -93,7 +93,6 @@ void NetworkManager::CleanTemporaryFiles()
 
 void NetworkManager::MainMenu()
 {
-    int choice = 0;
     bool finished = false;
     while(!finished)
     {
@@ -103,9 +102,8 @@ void NetworkManager::MainMenu()
         Print("3) Language Modeling Recursive Network\n");
         Print("4) Options\n");
         Print("9) Exit\n");
-        std::cin >> choice;
         
-        switch(choice)
+        switch(helpers::SafeCin())
         {
             case 1:
                 MnistFcNetwork();
