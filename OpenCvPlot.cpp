@@ -24,12 +24,15 @@ void OpenCvPlot::SimplePlot(std::deque<double>* data, int height, int width)
     for(int i=0; i<data->size(); i++)
         temp[i] = data->at(i);
     SimplePlot(temp, (int)data->size(), height, width);
+    delete[] (temp);
 }
 
 void OpenCvPlot::SimplePlot(double* data, int points, int height, int width)
 {
     // Create black empty images
     cv::Mat image = cv::Mat(height, width, CV_8UC3, cv::Scalar(255));
+    if(points == 0)
+        return;
     
     // find min and max
     double min = 0.0;

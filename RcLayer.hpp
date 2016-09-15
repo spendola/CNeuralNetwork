@@ -40,7 +40,7 @@ public:
     ~RcLayer();
     
     double* FeedForward(double* in, int wordsInSentence);
-    void BackPropagate(int wordsInSentence, double learningRate);
+    void BackPropagate(double* in, double* expected, int wordsInSentence, double learningRate);
     
     int CountParameters();
     void SaveParameters(std::deque<double>* parameters);

@@ -410,7 +410,7 @@ int DataLoader::GetLanguageTrainingSample(double* sample, double* expected)
             break;
     }
     
-    int sentenceCut = 1 + (rand() % (sentenceSize-1));
+    int sentenceCut = 1 + (rand() % (std::max(sentenceSize-1, 1)));
     for(int i=0; i<sentenceCut; i++)
     {
         sample[i] = trainingData[i+sampleIndex];

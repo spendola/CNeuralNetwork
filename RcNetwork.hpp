@@ -32,10 +32,14 @@ private:
     
     double* VectorizeSample(double* sample, int length);
     double CalculateLoss(double* input, double* output, int inputSize);
-    double TrainNetwork(int epochs, int batchSize);
+    double TrainNetwork(int epochs, int batchSize, double learningRate);
+    
+    void SaveParameters(std::string path);
+    void LoadParameters(std::string path, int size, bool testValidation);
     
     void Print(std::string str);
     void Publish(std::string str);
+    int autoSave;
     
 public:
     RcNetwork();

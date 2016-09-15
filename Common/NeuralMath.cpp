@@ -50,4 +50,49 @@ namespace neuralmath
                 z[i] = 0.0000001;
         }
     }
+    
+    // (a, b, c) x (x, y, z) = (ax, ay, az,  bx, by, bz,  cx, cy, cz)
+    void TensorProduct(double* out, double* a, double* b, int size_a, int size_b)
+    {
+        for(int i=0; i<size_a; i++)
+            for(int e=0; e<size_b; e++)
+                out[(i*size_b)+e] = a[i] * b[e];
+    }
+    
+    void LayerPropagation(double* target, double* source, double* weights, int target_size, int source_size)
+    {
+        for(int t=0; t<target_size; t++)
+        {
+            target[t] = 0.0;
+            for(int s=0; s<source_size; s++)
+            {
+                double value = source[s] * weights[(t*source_size)+s];
+                if(value != value)
+                {
+                    std::cout << "NAAAN\n";
+                    return;
+                }
+                target[t] += value;
+            }
+        }
+    }
+    
+    void WeightsBackpropagation(double* deltaWeights, double* source, double* weights, int source_size, int target_size)
+    {
+        for(int t=0; t<target_size; t++)
+        {
+            for(int s=0; s<source_size; s++)
+                deltaWeights[(t*source_size)+s] = source[s] * weights[(t*source_size)+s];
+        }
+    }
+    
+    void LayerBackpropagation(double* deltaTarget, double* source, double* weights, int source_size, int target_size)
+    {
+        for(int t=0; t<target_size; t++)
+        {
+            deltaTarget[t] = 0;
+            for(int s=0; s<source_size; s++)
+                deltaTarget[t] += weights[(t*source_size)+s] * source[s];
+        }
+    }
 }

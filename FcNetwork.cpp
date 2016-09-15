@@ -54,15 +54,13 @@ void FcNetwork::Start(bool enablePublishStatus)
     outputs = new double[dataLoader->trainingLabelSize]();
     while(true)
     {
-        int choice = 0;
         Print("\nChoose an Option\n");
         Print("1) Adaptive Network Training\n");
         Print("2) Evaluate Network\n");
         Print("3) Load Parameters\n");
         Print("4) Show History\n");
         Print("9) Exit\n");
-        std::cin >> choice;
-        switch (choice)
+        switch (helpers::SafeCin())
         {
             case 1:
                 Print("Enter Training Parameters(Epochs, Batch Size, Learning Rate, Regularization Rate, Decay Rate, Early Stop):\n");
@@ -227,6 +225,8 @@ void FcNetwork::LoadParameters(std::string path, int size, bool testValidation)
         if(hiddenLayer != NULL)
             hiddenLayer->LoadParameters(parameters, 0);
         std::cout << "Validation: " << EvaluateNetwork(false) << "%\n";
+        
+        SafeDeleteArray(parameters);
     }
     else
     {
