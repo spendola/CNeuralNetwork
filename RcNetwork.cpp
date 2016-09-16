@@ -42,13 +42,7 @@ DataLoader* RcNetwork::GetDataLoader()
 void RcNetwork::Start(bool enablePublishStatus)
 {
     Print("Starting Recurrent Neural Network");
-    publishNetworkStatus = enablePublishStatus ;
-    if(publishNetworkStatus)
-    {
-        remoteApi->PublishCommand("flushgraph");
-        remoteApi->PublishCommand("lossgraph");
-    }
-    
+    publishNetworkStatus = enablePublishStatus ;    
     double averageLoss = TrainNetwork(100000, 5, 1.0);
     Print("Training Completed: " + helpers::ToString(averageLoss) + " average Loss");
 }

@@ -54,20 +54,12 @@ double* RcLayer::FeedForward(double* in, int wordsInSentence)
     // Propagate into hidden layer
     for(int w=0; w<wordsInSentence; w++)
     {
-        neuralmath::LayerPropagation(&stepActivation[w*nNeurons], in, weights_in, nNeurons, nVocabulary);
+        if(!neuralmath::LayerPropagation(&stepActivation[w*nNeurons], in, weights_in, nNeurons, nVocabulary))
+            std::cout << "ERROR in LayerPropagation";
         
         if(w > 0)
-        {
             if(!neuralmath::LayerPropagation(&stepActivation[w*nNeurons], &stepActivation[(w-1)*nNeurons], weights_time, nNeurons, nNeurons))
-            {
-                if(helpers::CheckForNan(&stepActivation[w*nNeurons], nNeurons))
-                    helpers::PrintArray("StepActivation", &stepActivation[w*nNeurons], nNeurons);
-                if(helpers::CheckForNan(&stepActivation[(w-1)*nNeurons], nNeurons))
-                    helpers::PrintArray("StepActivation", &stepActivation[(w-1)*nNeurons], nNeurons);
-                if(helpers::CheckForNan(weights_time, nNeurons*nNeurons))
-                    helpers::PrintArray("Weights_Time", weights_time, nNeurons*nNeurons);
-            }
-        }
+                std::cout << "ERROR in LayerPropagation";
         
         for(int n=0; n<nNeurons; n++)
             stepActivation[(w*nNeurons)+n] = std::tanh(stepActivation[(w*nNeurons)+n]);

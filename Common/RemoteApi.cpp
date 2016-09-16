@@ -26,9 +26,10 @@ void RemoteApi::PublishMessage(std::string message)
     CURLcode res;
     curl = curl_easy_init();
     
-    message = messagePath + curl_easy_escape(curl, message.c_str(), (int)message.length());
     if(curl)
     {
+        char* cleanMessage = curl_easy_escape(curl, message.c_str(), (int)message.length());
+        message = messagePath + cleanMessage;
         curl_easy_setopt(curl, CURLOPT_URL, message.c_str());
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &RemoteApi::write_data);
@@ -37,6 +38,7 @@ void RemoteApi::PublishMessage(std::string message)
         if(res != CURLE_OK)
             fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
         
+        curl_free(cleanMessage);
         curl_easy_cleanup(curl);
     }
 }
@@ -49,11 +51,13 @@ void RemoteApi::PublishValue(double value)
     CURLcode res;
     curl = curl_easy_init();
 
-    std::string strValue = std::to_string(value);
-    std::string message = graphPath + curl_easy_escape(curl, strValue.c_str(), (int)strValue.length());
-    
+
     if(curl)
     {
+        std::string strValue = std::to_string(value);
+        char* cleanMessage = curl_easy_escape(curl, strValue.c_str(), (int)strValue.length());
+        std::string message = graphPath + cleanMessage;
+        
         curl_easy_setopt(curl, CURLOPT_URL, message.c_str());
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &RemoteApi::write_data);
@@ -62,6 +66,7 @@ void RemoteApi::PublishValue(double value)
         if(res != CURLE_OK)
             fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
         
+        curl_free(cleanMessage);
         curl_easy_cleanup(curl);
     }
 }
@@ -74,9 +79,10 @@ void RemoteApi::PublishCommand(std::string message)
     CURLcode res;
     curl = curl_easy_init();
     
-    message = commandPath + curl_easy_escape(curl, message.c_str(), (int)message.length());
     if(curl)
     {
+        char* cleanMessage = curl_easy_escape(curl, message.c_str(), (int)message.length());
+        message = commandPath + cleanMessage;
         curl_easy_setopt(curl, CURLOPT_URL, message.c_str());
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &RemoteApi::write_data);
@@ -85,6 +91,7 @@ void RemoteApi::PublishCommand(std::string message)
         if(res != CURLE_OK)
             fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
         
+        curl_free(cleanMessage);
         curl_easy_cleanup(curl);
     }
 }
