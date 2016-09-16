@@ -209,12 +209,20 @@ void DataLoader::LoadStopWords(std::string path)
     }
 }
 
-
-int DataLoader::GetFromDictionry(std::string word)
+int DataLoader::GetValueFromDictionry(std::string word)
 {
     if(dictionary.find(word.c_str()) != dictionary.end())
         return dictionary[word.c_str()];
     return dictionary["unknown_token"];
+}
+
+std::string DataLoader::GetWordFromDictionary(int value)
+{
+    std::map<std::string, int>::iterator it;
+    for (it = dictionary.begin(); it != dictionary.end(); ++it )
+        if (it->second == value)
+            return it->first;
+    return "*";
 }
 
 void DataLoader::LoadSentimentTrainingData(std::string path, int sampleSize, int labelSize)
@@ -250,7 +258,7 @@ void DataLoader::LoadSentimentTrainingData(std::string path, int sampleSize, int
             {
                 if(std::find(stopwords.begin(), stopwords.end(), token.c_str()) == stopwords.end())
                 {
-                    trainingData[(index*(trainingSampleSize + trainingLabelSize))+i++] = double(GetFromDictionry(token) / 10000.0);
+                    trainingData[(index*(trainingSampleSize + trainingLabelSize))+i++] = double(GetValueFromDictionry(token) / 10000.0);
                     if (i == (sampleSize-1))
                         break;
                 }
@@ -310,7 +318,7 @@ void DataLoader::LoadSentimentValidationData(std::string path, int sampleSize, i
             {
                 if(std::find(stopwords.begin(), stopwords.end(), token) == stopwords.end())
                 {
-                    validationData[(index*(validationSampleSize + validationLabelSize))+i++] = double(GetFromDictionry(token) / 10000.0);
+                    validationData[(index*(validationSampleSize + validationLabelSize))+i++] = double(GetValueFromDictionry(token) / 10000.0);
                     if (i == (sampleSize-1))
                         break;
                 }
@@ -369,7 +377,7 @@ void DataLoader::LoadLanguageModelTrainingData(std::string path, int sampleSize)
             int i = 1;
             while(getline(ss, token, ' ') && i<(sampleSize-1))
             {
-                trainingData[(index*sampleSize)+i++] = GetFromDictionry(token);
+                trainingData[(index*sampleSize)+i++] = GetValueFromDictionry(token);
             }
             
             trainingData[(index*sampleSize)+i] = dictionary["end_token"];

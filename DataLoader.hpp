@@ -53,7 +53,9 @@ public:
     int CreateTokenizedDictionary(std::string path, int threshold);
     void LoadStopWords(std::string path);
     void LoadDictionary(std::string path);
-    int GetFromDictionry(std::string word);
+    int GetValueFromDictionry(std::string word);
+    std::string GetWordFromDictionary(int value);
+    
     void LoadSentimentTrainingData(std::string path, int sampleSize, int labelSize);
     void LoadSentimentValidationData(std::string path, int sampleSize, int labelSize);
     

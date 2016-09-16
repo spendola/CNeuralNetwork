@@ -72,6 +72,24 @@ namespace helpers
         return maxIndex;
     }
     
+    int RandomInRange(double* values, int size, int range)
+    {
+        double max = 0.0;
+        std::deque<int> maxIndex;
+        for(int i=0; i<size; i++)
+            if(values[i] > max)
+            {
+                max = values[i];
+                maxIndex.push_front(i);
+                if(maxIndex.size() > range)
+                    maxIndex.pop_back();
+            }
+
+        if(maxIndex.size() > 0)
+            return values[rand() % maxIndex.size()];
+        return values[0];
+    }
+    
     std::vector<double> ParseInstruction(std::string instruction)
     {
         std::vector<double> output;

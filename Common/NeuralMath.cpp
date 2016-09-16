@@ -59,7 +59,7 @@ namespace neuralmath
                 out[(i*size_b)+e] = a[i] * b[e];
     }
     
-    void LayerPropagation(double* target, double* source, double* weights, int target_size, int source_size)
+    bool LayerPropagation(double* target, double* source, double* weights, int target_size, int source_size)
     {
         for(int t=0; t<target_size; t++)
         {
@@ -68,13 +68,11 @@ namespace neuralmath
             {
                 double value = source[s] * weights[(t*source_size)+s];
                 if(value != value)
-                {
-                    std::cout << "NAAAN\n";
-                    return;
-                }
+                    return false;
                 target[t] += value;
             }
         }
+        return true;
     }
     
     void WeightsBackpropagation(double* deltaWeights, double* source, double* weights, int source_size, int target_size)

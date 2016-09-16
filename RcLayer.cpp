@@ -57,7 +57,17 @@ double* RcLayer::FeedForward(double* in, int wordsInSentence)
         neuralmath::LayerPropagation(&stepActivation[w*nNeurons], in, weights_in, nNeurons, nVocabulary);
         
         if(w > 0)
-            neuralmath::LayerPropagation(&stepActivation[w*nNeurons], &stepActivation[(w-1)*nNeurons], &weights_time[w*nNeurons], nNeurons, nNeurons);
+        {
+            if(!neuralmath::LayerPropagation(&stepActivation[w*nNeurons], &stepActivation[(w-1)*nNeurons], weights_time, nNeurons, nNeurons))
+            {
+                if(helpers::CheckForNan(&stepActivation[w*nNeurons], nNeurons))
+                    helpers::PrintArray("StepActivation", &stepActivation[w*nNeurons], nNeurons);
+                if(helpers::CheckForNan(&stepActivation[(w-1)*nNeurons], nNeurons))
+                    helpers::PrintArray("StepActivation", &stepActivation[(w-1)*nNeurons], nNeurons);
+                if(helpers::CheckForNan(weights_time, nNeurons*nNeurons))
+                    helpers::PrintArray("Weights_Time", weights_time, nNeurons*nNeurons);
+            }
+        }
         
         for(int n=0; n<nNeurons; n++)
             stepActivation[(w*nNeurons)+n] = std::tanh(stepActivation[(w*nNeurons)+n]);

@@ -23,7 +23,7 @@ namespace neuralmath
     double quadraticcost(double* x, double* y, int size);
     
     void TensorProduct(double* out, double* a, double* b, int size_a, int size_b);
-    void LayerPropagation(double* target, double* source, double* weights, int target_size, int source_size);
+    bool LayerPropagation(double* target, double* source, double* weights, int target_size, int source_size);
     void WeightsBackpropagation(double* deltaWeights, double* source, double* weights,  int source_size, int target_size);
     void LayerBackpropagation(double* deltaTarget, double* source, double* weights, int source_size, int target_size);
 }

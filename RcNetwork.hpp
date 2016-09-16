@@ -48,7 +48,7 @@ public:
     
     void Start(bool enablePublishStatus);
     bool CreateHiddenLayer(int neurons, int vocabularySize);
-    int PredictNextWord(double* input);
+    void PredictNextWord(std::string str, int tolerance);
     
 };
 

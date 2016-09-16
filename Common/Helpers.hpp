@@ -15,6 +15,7 @@
 #include <sstream>
 #include <iomanip>
 #include <vector>
+#include <deque>
 #include "dirent.h"
 
 namespace helpers
@@ -22,6 +23,7 @@ namespace helpers
     void PrintArray(std::string label, double* data, int size);
     void PrintArrayEx(std::string label, double* data, int size, int precision);
     void PrintLabeledArray(std::string label, double* data, int size);
+    int RandomInRange(double* values, int size, int range);
 
     std::string GetTime();
     std::string ToString(double value);

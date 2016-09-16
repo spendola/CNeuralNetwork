@@ -20,6 +20,7 @@ RcNetwork::RcNetwork()
 
 RcNetwork::~RcNetwork()
 {
+    SafeDelete(remoteApi);
     SafeDelete(hiddenLayer);
     SafeDelete(dataLoader);
     SafeDeleteArray(input);
@@ -41,7 +42,7 @@ DataLoader* RcNetwork::GetDataLoader()
 void RcNetwork::Start(bool enablePublishStatus)
 {
     Print("Starting Recurrent Neural Network");
-    publishNetworkStatus = enablePublishStatus || true;;
+    publishNetworkStatus = enablePublishStatus ;
     if(publishNetworkStatus)
     {
         remoteApi->PublishCommand("flushgraph");
@@ -89,6 +90,7 @@ double RcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate)
             SafeDeleteArray(label);
             SafeDeleteArray(input);
             SafeDeleteArray(expected);
+            output = NULL;
         }
         Loss = double(Loss / batchSize);
         
@@ -106,9 +108,27 @@ double RcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate)
     return Loss;
 }
 
-int RcNetwork::PredictNextWord(double* input)
+void RcNetwork::PredictNextWord(std::string str, int tolerance)
 {
-    return 0;
+    int unknownToken = dataLoader->GetValueFromDictionry("[unknown_token]");
+    int endToken = dataLoader->GetValueFromDictionry("[end_token]");
+    int token = dataLoader->GetValueFromDictionry(str);
+    
+    if(token != unknownToken)
+    {
+        double* sentence = new double[32];
+        sentence[0] = token;
+        for(int i=0; i<32; i++)
+        {
+            Print(dataLoader->GetWordFromDictionary(sentence[i]) + " ");
+            double* output = hiddenLayer->FeedForward(VectorizeSample(sentence, i+1), i+1);
+            int nextWord = helpers::RandomInRange(output, nVocabulary, 5);
+            if(nextWord != endToken)
+                sentence[i+1] = nextWord;
+            else
+                break;
+        }
+    }
 }
 
 double RcNetwork::CalculateLoss(double* input, double* expected, int inputSize)
@@ -175,7 +195,6 @@ void RcNetwork::LoadParameters(std::string path, int size, bool testValidation)
         std::cout << i << " parameters found\n";
         if(hiddenLayer != NULL)
             hiddenLayer->LoadParameters(parameters, 0);
-        //std::cout << "Validation: " << EvaluateNetwork(false) << "%\n";
         
         SafeDeleteArray(parameters);
     }
