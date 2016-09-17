@@ -134,7 +134,7 @@ void RcLayer::BackPropagate(double* in, double* expected, int wordsInSentence, d
 
 int RcLayer::CountParameters()
 {
-    return nNeurons + (nVocabulary*nNeurons);
+    return ((nVocabulary*nNeurons)*2) + nNeurons ;
 }
 
 void RcLayer::SaveParameters(std::deque<double>* parameters)

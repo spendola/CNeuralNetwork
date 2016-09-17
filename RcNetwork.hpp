@@ -24,6 +24,7 @@ private:
     int nVocabulary;
     double* input;
     double* output;
+    double* parameters;
     bool publishNetworkStatus;
     
     RcLayer* hiddenLayer;
@@ -33,6 +34,7 @@ private:
     double* VectorizeSample(double* sample, int length);
     double CalculateLoss(double* input, double* output, int inputSize);
     double TrainNetwork(int epochs, int batchSize, double learningRate);
+    void PredictNextWord(std::string str, int tolerance);
     
     void SaveParameters(std::string path);
     void LoadParameters(std::string path, int size, bool testValidation);
@@ -48,7 +50,7 @@ public:
     
     void Start(bool enablePublishStatus);
     bool CreateHiddenLayer(int neurons, int vocabularySize);
-    void PredictNextWord(std::string str, int tolerance);
+    std::string GenerateSentence();
     
 };
 

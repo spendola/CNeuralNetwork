@@ -15,6 +15,7 @@ RcNetwork::RcNetwork()
     output = NULL;
     dataLoader = new DataLoader();
     remoteApi = new RemoteApi();
+    parameters = new double[3];
     autoSave = 30;
 }
 
@@ -25,6 +26,7 @@ RcNetwork::~RcNetwork()
     SafeDelete(dataLoader);
     SafeDeleteArray(input);
     SafeDeleteArray(output);
+    SafeDeleteArray(parameters);
 }
 
 bool RcNetwork::CreateHiddenLayer(int neurons, int vocabularySize)
@@ -42,9 +44,34 @@ DataLoader* RcNetwork::GetDataLoader()
 void RcNetwork::Start(bool enablePublishStatus)
 {
     Print("Starting Recurrent Neural Network");
-    publishNetworkStatus = enablePublishStatus ;    
-    double averageLoss = TrainNetwork(100000, 5, 1.0);
-    Print("Training Completed: " + helpers::ToString(averageLoss) + " average Loss");
+    publishNetworkStatus = enablePublishStatus;
+    while(true)
+    {
+        Print("\nChoose an Option");
+        Print("1) Language Modeling Training");
+        Print("2) Generate Sentence");
+        Print("3) Load Parameters");
+        Print("4) Exit");
+        switch (helpers::SafeCin())
+        {
+            case 1:
+                Print("Enter Training Parameters (epochs, batch size, learning rate)");
+                if(helpers::ParseParameters(parameters, 3))
+                    TrainNetwork(int(parameters[0]), int(parameters[1]), parameters[2]);
+                break;
+            case 2:
+                GenerateSentence();
+                break;
+            case 3:
+                LoadParameters(helpers::SelectFile("../Saved/", ".txt"), hiddenLayer->CountParameters(), true);
+                break;
+            case 9:
+                return;
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 double RcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate)
@@ -125,6 +152,11 @@ void RcNetwork::PredictNextWord(std::string str, int tolerance)
     }
 }
 
+std::string RcNetwork::GenerateSentence()
+{
+    return "";
+}
+
 double RcNetwork::CalculateLoss(double* input, double* expected, int inputSize)
 {
     double loss = 0.0;
@@ -188,7 +220,15 @@ void RcNetwork::LoadParameters(std::string path, int size, bool testValidation)
         }
         std::cout << i << " parameters found\n";
         if(hiddenLayer != NULL)
-            hiddenLayer->LoadParameters(parameters, 0);
+        {
+            if(i == hiddenLayer->CountParameters())
+            {
+                hiddenLayer->LoadParameters(parameters, 0);
+                Print("Process completed");
+            }
+            else
+                Print("ERROR: invalid number of parameters");
+        }
         
         SafeDeleteArray(parameters);
     }

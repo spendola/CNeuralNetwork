@@ -223,8 +223,15 @@ void FcNetwork::LoadParameters(std::string path, int size, bool testValidation)
         }
         std::cout << i << " parameters found\n";
         if(hiddenLayer != NULL)
-            hiddenLayer->LoadParameters(parameters, 0);
-        std::cout << "Validation: " << EvaluateNetwork(false) << "%\n";
+        {
+            if(i == hiddenLayer->CountParameters())
+            {
+                hiddenLayer->LoadParameters(parameters, 0);
+                Print("Validation: " + helpers::ToString(EvaluateNetwork(false)));
+            }
+            else
+                Print("ERROR: invalid number of parameters");
+        }
         
         SafeDeleteArray(parameters);
     }
