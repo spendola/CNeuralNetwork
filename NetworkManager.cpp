@@ -56,8 +56,8 @@ void NetworkManager::LangModelRcNetwork()
 {
     Publish("Starting Recursive Network for Language Modeling");
     RcNetwork* rcnet = new RcNetwork();
-    rcnet->GetDataLoader()->CreateTokenizedDictionary("../Training Data/Sentiment/TrainingData Reinforced.txt", 1);
-    rcnet->GetDataLoader()->LoadLanguageModelTrainingData("../Training Data/Sentiment/TrainingData Reinforced.txt", 32);
+    rcnet->GetDataLoader()->CreateTokenizedDictionary("../Training Data/Sentiment/TrainingData 65k.txt", 1);
+    rcnet->GetDataLoader()->LoadLanguageModelTrainingData("../Training Data/Sentiment/TrainingData 65k.txt", 32);
     rcnet->CreateHiddenLayer(100, rcnet->GetDataLoader()->dictionarySize);
     rcnet->Start(publishNetworkStatus);
     SafeDelete(rcnet);
