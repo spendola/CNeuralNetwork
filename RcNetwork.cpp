@@ -160,7 +160,10 @@ std::string RcNetwork::GenerateSentence(std::string seed, int tolerance, int lim
         }
         
         for(int e=0; e<i; e++)
-            retVal = retVal + " " + dataLoader->GetWordFromDictionary(sentence[e+1]);
+        {
+            if(sentence[e+1] < sentence[e])
+                retVal = retVal + " " + dataLoader->GetWordFromDictionary(sentence[e+1]);
+        }
     }
     return retVal;
 }

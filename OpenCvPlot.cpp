@@ -30,7 +30,7 @@ void OpenCvPlot::SimplePlot(std::deque<double>* data, int height, int width)
 void OpenCvPlot::SimplePlot(double* data, int points, int height, int width)
 {
     // Create black empty images
-    cv::Mat image = cv::Mat(height, width, CV_8UC3, cv::Scalar(255));
+    cv::Mat image = cv::Mat(height, width, CV_8UC3, cv::Scalar(255, 255, 255));
     if(points == 0)
         return;
     

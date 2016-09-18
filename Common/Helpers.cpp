@@ -76,7 +76,7 @@ namespace helpers
     {
         double max = 0.0;
         std::deque<int> maxIndex;
-        for(int i=1; i<size; i++)
+        for(int i=3; i<size; i++)
             if(values[i] > max)
             {
                 max = values[i];

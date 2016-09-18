@@ -42,8 +42,8 @@ void NetworkManager::SentAnalysisFcNetwork()
 {
     Publish("Starting Fully Connected Network for Sentiment Analysis");
     FcNetwork* fcnet = new FcNetwork();
-    fcnet->CreateLayer(32, 128);
-    fcnet->CreateLayer(128, 2);
+    fcnet->CreateLayer(32, 30);
+    fcnet->CreateLayer(30, 2);
     fcnet->GetDataLoader()->LoadStopWords("../Training Data/Sentiment/stopwords_en.txt");
     fcnet->GetDataLoader()->CreateTokenizedDictionary("../Training Data/Sentiment/TrainingData 65k.txt", 1);
     fcnet->GetDataLoader()->LoadSentimentTrainingData("../Training Data/Sentiment/TrainingData 65k.txt", 32, 2);
