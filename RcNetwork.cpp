@@ -60,7 +60,7 @@ void RcNetwork::Start(bool enablePublishStatus)
                     TrainNetwork(int(parameters[0]), int(parameters[1]), parameters[2]);
                 break;
             case 2:
-                Print(GenerateSentence(dataLoader->GetWordFromDictionary(rand() % nVocabulary), 5));
+                Print(GenerateSentence(dataLoader->GetWordFromDictionary(rand() % nVocabulary), 5, 12));
                 break;
             case 3:
                 LoadParameters(helpers::SelectFile("../Saved/", ".txt"), hiddenLayer->CountParameters(), true);
@@ -124,14 +124,14 @@ double RcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate)
         if(countBeforeSave == autoSave)
         {
             SaveParameters("../Saved/RcParameters.txt");
-            Publish(GenerateSentence(dataLoader->GetWordFromDictionary(rand() % nVocabulary), 5));
+            Publish(GenerateSentence(dataLoader->GetWordFromDictionary(rand() % nVocabulary), 5, 10));
             countBeforeSave = 0;
         }
     }
     return Loss;
 }
 
-std::string RcNetwork::GenerateSentence(std::string seed, int tolerance)
+std::string RcNetwork::GenerateSentence(std::string seed, int tolerance, int limit)
 {
     std::string retVal = seed;
     int unknownToken = dataLoader->GetValueFromDictionry("unknown_token");
@@ -141,9 +141,9 @@ std::string RcNetwork::GenerateSentence(std::string seed, int tolerance)
     if(token != unknownToken)
     {
         int i = 0;
-        double sentence[16];
+        double sentence[limit];
         sentence[0] = token;
-        for(i=0; i<16; i++)
+        for(i=0; i<limit; i++)
         {
             double* input = VectorizeSample(sentence, i+1);
             double* output = hiddenLayer->FeedForward(input, i+1);

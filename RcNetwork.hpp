@@ -50,7 +50,7 @@ public:
     
     void Start(bool enablePublishStatus);
     bool CreateHiddenLayer(int neurons, int vocabularySize);
-    std::string GenerateSentence(std::string seed, int tolerance);
+    std::string GenerateSentence(std::string seed, int tolerance, int limit);
     
 };
 
