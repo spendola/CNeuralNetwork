@@ -76,7 +76,7 @@ namespace helpers
     {
         double max = 0.0;
         std::deque<int> maxIndex;
-        for(int i=0; i<size; i++)
+        for(int i=1; i<size; i++)
             if(values[i] > max)
             {
                 max = values[i];
@@ -86,8 +86,8 @@ namespace helpers
             }
 
         if(maxIndex.size() > 0)
-            return values[rand() % maxIndex.size()];
-        return values[0];
+            return maxIndex[rand() % maxIndex.size()];
+        return maxIndex[0];
     }
     
     std::vector<double> ParseInstruction(std::string instruction)

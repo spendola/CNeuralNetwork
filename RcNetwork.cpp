@@ -16,7 +16,7 @@ RcNetwork::RcNetwork()
     dataLoader = new DataLoader();
     remoteApi = new RemoteApi();
     parameters = new double[3];
-    autoSave = 30;
+    autoSave = 25;
 }
 
 RcNetwork::~RcNetwork()
@@ -60,7 +60,7 @@ void RcNetwork::Start(bool enablePublishStatus)
                     TrainNetwork(int(parameters[0]), int(parameters[1]), parameters[2]);
                 break;
             case 2:
-                GenerateSentence();
+                Print(GenerateSentence(dataLoader->GetWordFromDictionary(rand() % nVocabulary), 5));
                 break;
             case 3:
                 LoadParameters(helpers::SelectFile("../Saved/", ".txt"), hiddenLayer->CountParameters(), true);
@@ -101,17 +101,19 @@ double RcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate)
             
             for(int w=0; w<sentenceLength; w++)
             {
-                double diff = output[ (w*dataLoader->dictionarySize) + int(label[w])];
+                double diff = output[(w*dataLoader->dictionarySize) + int(label[w])];
                 partialLoss += std::log(diff) * -1.0;
             }
             Loss += partialLoss/double(sentenceLength);
             hiddenLayer->BackPropagate(input, expected, sentenceLength, learningRate);
             
+            hiddenLayer->CleanUp();
+            output = NULL;
+            //SafeDelete(output);
             SafeDeleteArray(sample);
             SafeDeleteArray(label);
             SafeDeleteArray(input);
             SafeDeleteArray(expected);
-            output = NULL;
         }
         Loss = double(Loss / batchSize);
         
@@ -123,47 +125,55 @@ double RcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate)
         if(countBeforeSave == autoSave)
         {
             SaveParameters("../Saved/RcParameters.txt");
+            Publish(GenerateSentence(dataLoader->GetWordFromDictionary(rand() % nVocabulary), 5));
             countBeforeSave = 0;
         }
     }
     return Loss;
 }
 
-void RcNetwork::PredictNextWord(std::string str, int tolerance)
+std::string RcNetwork::GenerateSentence(std::string seed, int tolerance)
 {
-    int unknownToken = dataLoader->GetValueFromDictionry("[unknown_token]");
-    int endToken = dataLoader->GetValueFromDictionry("[end_token]");
-    int token = dataLoader->GetValueFromDictionry(str);
+    std::string retVal = seed;
+    int unknownToken = dataLoader->GetValueFromDictionry("unknown_token");
+    int endToken = dataLoader->GetValueFromDictionry("end_token");
+    int token = dataLoader->GetValueFromDictionry(seed);
     
     if(token != unknownToken)
     {
-        double* sentence = new double[32];
+        int i = 0;
+        double sentence[16];
         sentence[0] = token;
-        for(int i=0; i<32; i++)
+        for(i=0; i<16; i++)
         {
-            Print(dataLoader->GetWordFromDictionary(sentence[i]) + " ");
-            double* output = hiddenLayer->FeedForward(VectorizeSample(sentence, i+1), i+1);
+            double* input = VectorizeSample(sentence, i+1);
+            double* output = hiddenLayer->FeedForward(input, i+1);
             int nextWord = helpers::RandomInRange(output, nVocabulary, 5);
+            
+            SafeDeleteArray(input);
+            hiddenLayer->CleanUp();
+            output = NULL;
+            
             if(nextWord != endToken)
                 sentence[i+1] = nextWord;
             else
                 break;
         }
+        
+        for(int e=0; e<i; e++)
+            retVal = retVal + " " + dataLoader->GetWordFromDictionary(sentence[e+1]);
     }
+    return retVal;
 }
 
-std::string RcNetwork::GenerateSentence()
-{
-    return "";
-}
 
 double RcNetwork::CalculateLoss(double* input, double* expected, int inputSize)
 {
     double loss = 0.0;
-    double* output = hiddenLayer->FeedForward(input, 0);
+    std::tuple<double*, double*> output = hiddenLayer->FeedForward(input, 0);
     for(int i=0; i<inputSize; i++)
     {
-        double diff = output[(i*nVocabulary) + int(expected[i])];
+        double diff = std::get<0>(output)[(i*nVocabulary) + int(expected[i])];
         loss += std::log(diff) * -1.0;
     }
     return loss;

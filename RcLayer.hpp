@@ -41,6 +41,7 @@ public:
     
     double* FeedForward(double* in, int wordsInSentence);
     void BackPropagate(double* in, double* expected, int wordsInSentence, double learningRate);
+    void CleanUp();
     
     int CountParameters();
     void SaveParameters(std::deque<double>* parameters);

@@ -30,6 +30,12 @@ RcLayer::~RcLayer()
     SafeDeleteArray(weights_time);
 }
 
+void RcLayer::CleanUp()
+{
+    SafeDeleteArray(stepOutput);
+    SafeDeleteArray(stepActivation);
+}
+
 void RcLayer::InitializeWeights(double lower_bound, double upper_bound)
 {
     std::uniform_real_distribution<double> unif(lower_bound,upper_bound);
@@ -45,10 +51,7 @@ void RcLayer::InitializeWeights(double lower_bound, double upper_bound)
 
 double* RcLayer::FeedForward(double* in, int wordsInSentence)
 {
-    SafeDelete(stepActivation);
     stepActivation = new double[wordsInSentence*nNeurons]();
-    
-    SafeDeleteArray(stepOutput);
     stepOutput = new double[wordsInSentence*nVocabulary]();
     
     // Propagate into hidden layer
