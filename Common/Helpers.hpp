@@ -27,6 +27,7 @@ namespace helpers
 
     std::string GetTime();
     std::string ToString(double value);
+    bool ValidateWord(std::string str);
     double Percentage(double part, double total);
     
     int ParseOutput(double* output, int size);

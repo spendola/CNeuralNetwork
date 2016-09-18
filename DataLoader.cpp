@@ -81,7 +81,7 @@ void DataLoader::LoadMnistTrainingData(std::string path, int sampleCount, int sa
     }
 }
 
-
+/*
 
 int DataLoader::CreateDictionary(std::string path)
 {
@@ -118,6 +118,7 @@ int DataLoader::CreateDictionary(std::string path)
         return 0;
     }
 }
+*/
 
 int DataLoader::CreateTokenizedDictionary(std::string path, int threshold)
 {
@@ -129,7 +130,6 @@ int DataLoader::CreateTokenizedDictionary(std::string path, int threshold)
         std::cout << "Creating Tokenized Dictionary\n";
         file.seekg(0, std::ios::beg);
         
-
         while(getline(file, line))
         {
             std::transform(line.begin(), line.end(), line.begin(), ::tolower);
@@ -137,6 +137,7 @@ int DataLoader::CreateTokenizedDictionary(std::string path, int threshold)
             std::string token;
             while(getline(ss, token, ' '))
             {
+
                 if (temp.find(token.c_str()) == temp.end())
                     temp[token.c_str()] = 1;
                 else
@@ -153,7 +154,7 @@ int DataLoader::CreateTokenizedDictionary(std::string path, int threshold)
         // Remove unfrequent words
         for (std::map<std::string,int>::iterator it=temp.begin(); it!=temp.end(); ++it)
         {
-            if(it->second > threshold)
+            if(it->second > threshold && helpers::ValidateWord(it->first))
                 dictionary[it->first] = i++;
         }
         

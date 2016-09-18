@@ -115,6 +115,14 @@ namespace helpers
         return buffer;
     }
     
+    bool ValidateWord(std::string str)
+    {
+        for(int i=0; i<str.length(); i++)
+            if(!std::isalpha(str[i]))
+                return false;
+        return true;
+    }
+    
     double Percentage(double part, double total)
     {
         return 100.0*(part/total);

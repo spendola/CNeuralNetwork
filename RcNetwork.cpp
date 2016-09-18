@@ -16,7 +16,7 @@ RcNetwork::RcNetwork()
     dataLoader = new DataLoader();
     remoteApi = new RemoteApi();
     parameters = new double[3];
-    autoSave = 25;
+    autoSave = 100;
 }
 
 RcNetwork::~RcNetwork()
@@ -109,7 +109,6 @@ double RcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate)
             
             hiddenLayer->CleanUp();
             output = NULL;
-            //SafeDelete(output);
             SafeDeleteArray(sample);
             SafeDeleteArray(label);
             SafeDeleteArray(input);
