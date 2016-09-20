@@ -96,10 +96,8 @@ double FcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate, d
             for (int i=0; i<batchSize; i++)
             {
                 dataLoader->GetRandomTrainingSample(inputs, outputs);
-                
                 double* output = hiddenLayer->FeedForward(inputs);
                 hiddenLayer->BackPropagate(inputs, outputs);
-                
                 cost += neuralmath::quadraticcost(output, inputs, nOut);
             }
             
@@ -109,8 +107,7 @@ double FcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate, d
             // Evaluate
             validationRate = EvaluateNetwork(validationRate > 90.0);
             validations += validationRate;
-            std::cout << "Epoch " << e << " Completed: lr: " << learningRate << ", cost: " << std::setprecision(4) << cost << ", ";
-            std::cout << "validation: " << validationRate << "%\n";
+            Print("Epoch " + helpers::ToString(e) + " completed, cost: " + helpers::ToString(cost) + ", validation: " + helpers::ToString(validationRate) + "\n");
         }
         return validations/(double)epochs;
     }

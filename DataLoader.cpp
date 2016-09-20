@@ -81,47 +81,10 @@ void DataLoader::LoadMnistTrainingData(std::string path, int sampleCount, int sa
     }
 }
 
-/*
 
-int DataLoader::CreateDictionary(std::string path)
+int DataLoader::CreateTokenizedDictionary(std::string path, bool removeUnfrequent, bool removeNonAlpha)
 {
-    std::string line;
-    std::ifstream file (path);
-    if(file.is_open())
-    {
-        std::cout << "Creating Dictionary\n";
-        file.seekg(0, std::ios::beg);
-        
-        dictionary["start_token"] = 1;
-        dictionary["end_token"] = 2;
-        dictionary["unknown_token"] = 3;
-        
-        int i = (int)dictionary.size() + 1;
-        while(getline(file, line))
-        {
-            std::stringstream ss(line.substr(2));
-            std::string token;
-            while(getline(ss, token, ' '))
-            {
-                if ( dictionary.find(token.c_str()) == dictionary.end() )
-                    dictionary[token.c_str()] = i++;
-            }
-        }
-        file.close();
-        dictionarySize = (int)dictionary.size();
-        std::cout << dictionary.size() << " words added to dictionary\n";
-        return (int)dictionary.size();
-    }
-    else
-    {
-        std::cout << "Unable to open file\n";
-        return 0;
-    }
-}
-*/
-
-int DataLoader::CreateTokenizedDictionary(std::string path, int threshold)
-{
+    int threshold = 1;
     std::string line;
     std::ifstream file (path);
     std::map<std::string, int> temp;
@@ -154,12 +117,13 @@ int DataLoader::CreateTokenizedDictionary(std::string path, int threshold)
         // Remove unfrequent words
         for (std::map<std::string,int>::iterator it=temp.begin(); it!=temp.end(); ++it)
         {
-            if(it->second > threshold && helpers::ValidateWord(it->first))
+            if((!removeNonAlpha || it->second > threshold) && (!removeUnfrequent || helpers::ValidateWord(it->first)))
                 dictionary[it->first] = i++;
         }
         
         dictionarySize = (int)dictionary.size();
-        std::cout << temp.size() << " words found, " << temp.size() - dictionary.size() << " words excluded\n";
+        if(removeUnfrequent || removeNonAlpha)
+            std::cout << temp.size() << " words found, " << temp.size() - dictionary.size() << " words excluded\n";
         std::cout << dictionary.size() << " words added to dictionary\n";
         return (int)dictionary.size();
     }
@@ -226,7 +190,19 @@ std::string DataLoader::GetWordFromDictionary(int value)
     return "*";
 }
 
-void DataLoader::LoadSentimentTrainingData(std::string path, int sampleSize, int labelSize)
+void DataLoader::PrintSentence(double* sentence, int size)
+{
+    for(int i=0; i<size; i++)
+    {
+        if(sentence[i] > 0)
+            std::cout << GetWordFromDictionary(sentence[i]*dictionarySize) << " ";
+        else
+            break;
+    }
+    std::cout << "\n";
+}
+
+void DataLoader::LoadSentimentTrainingData(std::string path, int sampleSize, int labelSize, bool ignoreStopWords)
 {
     std::cout << "Loading Sentiment Analysis Training Data: " << path << "\n";
     trainingSampleSize = sampleSize;
@@ -257,9 +233,9 @@ void DataLoader::LoadSentimentTrainingData(std::string path, int sampleSize, int
             // Sample Data
             while(getline(ss, token, ' '))
             {
-                if(std::find(stopwords.begin(), stopwords.end(), token.c_str()) == stopwords.end())
+                if(!ignoreStopWords || std::find(stopwords.begin(), stopwords.end(), token.c_str()) == stopwords.end())
                 {
-                    trainingData[(index*(trainingSampleSize + trainingLabelSize))+i++] = double(GetValueFromDictionry(token) / 10000.0);
+                    trainingData[(index*(trainingSampleSize + trainingLabelSize))+i++] = double(GetValueFromDictionry(token)) / dictionarySize;
                     if (i == (sampleSize-1))
                         break;
                 }
@@ -287,7 +263,7 @@ void DataLoader::LoadSentimentTrainingData(std::string path, int sampleSize, int
     }
 }
 
-void DataLoader::LoadSentimentValidationData(std::string path, int sampleSize, int labelSize)
+void DataLoader::LoadSentimentValidationData(std::string path, int sampleSize, int labelSize, bool ignoreStopWords)
 {
     std::cout << "Loading Sentiment Analysis Validation Data: " << path << "\n";
     validationSampleSize = sampleSize;
@@ -317,9 +293,9 @@ void DataLoader::LoadSentimentValidationData(std::string path, int sampleSize, i
             // Sample Data
             while(getline(ss, token, ' '))
             {
-                if(std::find(stopwords.begin(), stopwords.end(), token) == stopwords.end())
+                if(!ignoreStopWords || std::find(stopwords.begin(), stopwords.end(), token) == stopwords.end())
                 {
-                    validationData[(index*(validationSampleSize + validationLabelSize))+i++] = double(GetValueFromDictionry(token) / 10000.0);
+                    validationData[(index*(validationSampleSize + validationLabelSize))+i++] = double(GetValueFromDictionry(token)) / dictionarySize;
                     if (i == (sampleSize-1))
                         break;
                 }

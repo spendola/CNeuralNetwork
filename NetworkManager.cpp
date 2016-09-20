@@ -42,12 +42,12 @@ void NetworkManager::SentAnalysisFcNetwork()
 {
     Publish("Starting Fully Connected Network for Sentiment Analysis");
     FcNetwork* fcnet = new FcNetwork();
-    fcnet->CreateLayer(32, 30);
-    fcnet->CreateLayer(30, 2);
+    fcnet->CreateLayer(32, 100);
+    fcnet->CreateLayer(100, 2);
     fcnet->GetDataLoader()->LoadStopWords("../Training Data/Sentiment/stopwords_en.txt");
-    fcnet->GetDataLoader()->CreateTokenizedDictionary("../Training Data/Sentiment/TrainingData 65k.txt", 1);
-    fcnet->GetDataLoader()->LoadSentimentTrainingData("../Training Data/Sentiment/TrainingData 65k.txt", 32, 2);
-    fcnet->GetDataLoader()->LoadSentimentValidationData("../Training Data/Sentiment/ValidationData.txt", 32, 1);
+    fcnet->GetDataLoader()->CreateTokenizedDictionary("../Training Data/Sentiment/TrainingData 65k.txt", false, false);
+    fcnet->GetDataLoader()->LoadSentimentTrainingData("../Training Data/Sentiment/TrainingData 65k.txt", 32, 2, false);
+    fcnet->GetDataLoader()->LoadSentimentValidationData("../Training Data/Sentiment/ValidationData.txt", 32, 1, false);
     fcnet->Start(publishNetworkStatus);
     SafeDelete(fcnet);
 }
@@ -56,7 +56,7 @@ void NetworkManager::LangModelRcNetwork()
 {
     Publish("Starting Recursive Network for Language Modeling");
     RcNetwork* rcnet = new RcNetwork();
-    rcnet->GetDataLoader()->CreateTokenizedDictionary("../Training Data/Sentiment/TrainingData 65k.txt", 1);
+    rcnet->GetDataLoader()->CreateTokenizedDictionary("../Training Data/Sentiment/TrainingData 65k.txt", true, true);
     rcnet->GetDataLoader()->LoadLanguageModelTrainingData("../Training Data/Sentiment/TrainingData 65k.txt", 32);
     rcnet->CreateHiddenLayer(100, rcnet->GetDataLoader()->dictionarySize);
     rcnet->Start(publishNetworkStatus);

@@ -51,14 +51,15 @@ public:
     // Sentiment Data
     
     int CreateDictionary(std::string path);
-    int CreateTokenizedDictionary(std::string path, int threshold);
+    int CreateTokenizedDictionary(std::string path, bool removeUnfrequent, bool removeNonAlpha);
     void LoadStopWords(std::string path);
     void LoadDictionary(std::string path);
     int GetValueFromDictionry(std::string word);
     std::string GetWordFromDictionary(int value);
+    void PrintSentence(double* sentence, int size);
     
-    void LoadSentimentTrainingData(std::string path, int sampleSize, int labelSize);
-    void LoadSentimentValidationData(std::string path, int sampleSize, int labelSize);
+    void LoadSentimentTrainingData(std::string path, int sampleSize, int labelSize, bool ignoreStopWords);
+    void LoadSentimentValidationData(std::string path, int sampleSize, int labelSize, bool ignoreStopWords);
     
     // LanguageModeling Data
     void LoadLanguageModelTrainingData(std::string path, int sampleSize);
