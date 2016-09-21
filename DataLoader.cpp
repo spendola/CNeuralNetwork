@@ -85,6 +85,7 @@ void DataLoader::LoadMnistTrainingData(std::string path, int sampleCount, int sa
 int DataLoader::CreateTokenizedDictionary(std::string path, bool removeUnfrequent, bool removeNonAlpha)
 {
     int threshold = 1;
+    int ignoredWords = 0;
     std::string line;
     std::ifstream file (path);
     std::map<std::string, int> temp;
@@ -100,18 +101,21 @@ int DataLoader::CreateTokenizedDictionary(std::string path, bool removeUnfrequen
             std::string token;
             while(getline(ss, token, ' '))
             {
-
-                if (temp.find(token.c_str()) == temp.end())
-                    temp[token.c_str()] = 1;
+                if(helpers::ValidateWord(token))
+                {
+                    if (temp.find(token.c_str()) == temp.end())
+                        temp[token.c_str()] = 1;
+                    else
+                        temp[token.c_str()] = temp[token.c_str()] + 1;
+                }
                 else
-                    temp[token.c_str()] = temp[token.c_str()] + 1;
+                    ignoredWords++;
             }
         }
         file.close();
-        
+        dictionary["unknown_token"] = 0;
         dictionary["start_token"] = 1;
         dictionary["end_token"] = 2;
-        dictionary["unknown_token"] = 3;
         int i = (int)dictionary.size() + 1;
         
         // Remove unfrequent words
@@ -119,12 +123,12 @@ int DataLoader::CreateTokenizedDictionary(std::string path, bool removeUnfrequen
         {
             if((!removeNonAlpha || it->second > threshold) && (!removeUnfrequent || helpers::ValidateWord(it->first)))
                 dictionary[it->first] = i++;
+            else
+                ignoredWords++;
         }
         
         dictionarySize = (int)dictionary.size();
-        if(removeUnfrequent || removeNonAlpha)
-            std::cout << temp.size() << " words found, " << temp.size() - dictionary.size() << " words excluded\n";
-        std::cout << dictionary.size() << " words added to dictionary\n";
+        std::cout << dictionary.size() << " words added to dictionary, " << ignoredWords << " ignored\n";
         return (int)dictionary.size();
     }
     else
@@ -196,8 +200,6 @@ void DataLoader::PrintSentence(double* sentence, int size)
     {
         if(sentence[i] > 0)
             std::cout << GetWordFromDictionary(sentence[i]*dictionarySize) << " ";
-        else
-            break;
     }
     std::cout << "\n";
 }

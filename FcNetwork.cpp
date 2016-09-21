@@ -96,6 +96,7 @@ double FcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate, d
             for (int i=0; i<batchSize; i++)
             {
                 dataLoader->GetRandomTrainingSample(inputs, outputs);
+                //dataLoader->PrintSentence(inputs, 32);
                 double* output = hiddenLayer->FeedForward(inputs);
                 hiddenLayer->BackPropagate(inputs, outputs);
                 cost += neuralmath::quadraticcost(output, inputs, nOut);
@@ -122,6 +123,7 @@ double FcNetwork::EvaluateNetwork(bool subSample)
     for (int i=0; i<validationSamples; i++)
     {
         dataLoader->GetValidationSample(subSample ? -1 : i, inputs, outputs);
+        //dataLoader->PrintSentence(inputs, 32);
         double* output = hiddenLayer->FeedForward(inputs);
         pass += helpers::ParseOutput(output, nOut) == (int)outputs[0] ? 1.0 : 0.0;
     }
@@ -137,7 +139,6 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
     double adaptiveLearningRate = learningRate;
     double originalValidationRate = 1.0;
     int overfittingCount = 0;
-    std::string startTime = helpers::GetTime();
     
     Publish("Adaptive Training Started");
     Publish("Learning Rate: " + std::to_string(learningRate) + ", Regularization: " + std::to_string(lambda));
@@ -169,7 +170,7 @@ void FcNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
         }
         
         originalValidationRate = currentValidationRate;
-        SaveParameters("../Saved/Training on " + startTime + ".txt");
+        SaveParameters("../Saved/FcParameters.txt");
     }
     
     Publish("Adaptive Training Finished");
