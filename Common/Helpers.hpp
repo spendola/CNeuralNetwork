@@ -6,6 +6,9 @@
 //  Copyright © 2016 Sebastian Pendola. All rights reserved.
 //
 
+#define SafeDelete(p) if ((p) != NULL) { delete (p); (p) = NULL; }
+#define SafeDeleteArray(p) if ((p) != NULL) { delete[] (p); (p) = NULL; }
+
 #ifndef Helpers_hpp
 #define Helpers_hpp
 
@@ -16,13 +19,18 @@
 #include <iomanip>
 #include <vector>
 #include <deque>
+#include <random>
+#include <ctime>
+#include <cmath>
 #include "dirent.h"
 
 namespace helpers
 {
+    void InitializeRandomArray(double* data, int size);
     void PrintArray(std::string label, double* data, int size);
     void PrintArrayEx(std::string label, double* data, int size, int precision);
     void PrintLabeledArray(std::string label, double* data, int size);
+    void PrintMatrix(double* data, int width, int height);
     int RandomInRange(double* values, int size, int range);
 
     std::string GetTime();
@@ -38,6 +46,8 @@ namespace helpers
     
     std::string SelectFile(std::string path, std::string suffix);
     int SafeCin();
+    
+    int CalculateOutputSize(int inputWidth, int inputHeight, int featureWidth, int featureHeight, int poolingWidth, int poolingHeight);
 }
 
 namespace history

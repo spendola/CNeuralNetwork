@@ -9,9 +9,6 @@
 #ifndef FcNetwork_hpp
 #define FcNetwork_hpp
 
-#define SafeDelete(p) if ((p) != NULL) { delete (p); (p) = NULL; }
-#define SafeDeleteArray(p) if ((p) != NULL) { delete[] (p); (p) = NULL; }
-
 #include <stdio.h>
 #include <iomanip>
 #include <cstring>
@@ -21,8 +18,8 @@
 #include "FcLayer.hpp"
 #include "DataLoader.hpp"
 #include "RemoteApi.hpp"
-#include "Common/StopWatch.hpp"
-#include "Common/Helpers.hpp"
+#include "StopWatch.hpp"
+#include "Helpers.hpp"
 #include "OpenCvPlot.hpp"
 
 class FcNetwork
@@ -31,11 +28,11 @@ class FcNetwork
 private:
     int nIn;
     int nOut;
-    double* inputs;
-    double* outputs;
+    double* input;
+    double* label;
     bool publishNetworkStatus;
     
-    FcLayer* hiddenLayer;
+    HiddenLayer* hiddenLayer;
     DataLoader* dataLoader;
     RemoteApi* remoteApi;
     
@@ -48,12 +45,12 @@ private:
     
 public:
     
-    FcNetwork();
+    FcNetwork(int input, int output);
     ~FcNetwork();
     
     void Start(bool enablePublishStatus);
     DataLoader* GetDataLoader();
-    bool CreateLayer(int input, int output);
+    void ConnectLayer(HiddenLayer* layer);
     
     void AdaptiveTraining(int epochs, int batchSize, double learningRate, double lambda, double decayRate, int earlyStop);
     double TrainNetwork(int epochs, int batchSize, double learningRate, double lambda);

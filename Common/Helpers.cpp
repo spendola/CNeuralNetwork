@@ -10,6 +10,14 @@
 
 namespace helpers
 {
+    void InitializeRandomArray(double* data, int size)
+    {
+        std::default_random_engine de((unsigned)time(0));
+        std::normal_distribution<double> nd(0.0, 1.0);
+        for(int i = 0; i < (size); ++i)
+            data[i] = nd(de);
+    }
+    
     void PrintArray(std::string label, double* data, int size)
     {
         std::cout << label << ": ";
@@ -23,6 +31,18 @@ namespace helpers
         std::cout << label << ": ";
         for(int i=0; i<size; i++)
             std::cout << std::setprecision(precision) << data[i] << ", ";
+        std::cout << "\n";
+    }
+    
+    void PrintMatrix(double* data, int width, int height)
+    {
+        std::cout << "\n";
+        for(int r=0; r<height; r++)
+        {
+            for(int c=0; c<width; c++)
+                std::cout << std::setprecision(3) << data[(r*width)+c] << "  ";
+            std::cout << "\n";
+        }
         std::cout << "\n";
     }
     
@@ -69,6 +89,7 @@ namespace helpers
                 maxIndex = i;
             }
         }
+        //std::cout << maxIndex << " ?= ";
         return maxIndex;
     }
     
@@ -89,6 +110,7 @@ namespace helpers
             return maxIndex[rand() % maxIndex.size()];
         return maxIndex[0];
     }
+    
     
     std::vector<double> ParseInstruction(std::string instruction)
     {
@@ -180,6 +202,19 @@ namespace helpers
             return 0;
         }
         return n;
+    }
+    
+    
+    int CalculateOutputSize(int inputWidth, int inputHeight, int featureWidth, int featureHeight, int poolingWidth, int poolingHeight)
+    {
+        int featureOutputSize = (inputWidth - featureWidth + 1) * (inputHeight - featureWidth + 1);
+        int horizontalSteps = (inputWidth - featureWidth + 1)  / poolingWidth;
+        int verticalSteps = (inputHeight - featureWidth + 1) / poolingHeight;
+        int poolSize = horizontalSteps*verticalSteps;
+        
+        std::cout << "FeatureMap output: " << featureOutputSize << "\n";
+        std::cout << "PoolingLayer output: " << poolSize << "\n";
+        return poolSize;
     }
     
 }

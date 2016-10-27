@@ -8,12 +8,14 @@
 
 #include "FcNetwork.hpp"
 
-FcNetwork::FcNetwork()
+FcNetwork::FcNetwork(int input, int output)
 {
     srand((unsigned)time(0));
     hiddenLayer = NULL;
-    outputs = NULL;
-    inputs = NULL;
+    label = NULL;
+    input = NULL;
+    nIn = input;
+    nOut = output;
     
     dataLoader = new DataLoader();
     remoteApi = new RemoteApi();
@@ -24,8 +26,8 @@ FcNetwork::~FcNetwork()
     SafeDelete(hiddenLayer);
     SafeDelete(dataLoader);
     SafeDelete(remoteApi);
-    SafeDeleteArray(inputs);
-    SafeDeleteArray(outputs);
+    SafeDeleteArray(input);
+    SafeDeleteArray(label);
 }
 
 DataLoader* FcNetwork::GetDataLoader()
@@ -33,25 +35,21 @@ DataLoader* FcNetwork::GetDataLoader()
     return dataLoader;
 }
 
-bool FcNetwork::CreateLayer(int input, int output)
+void FcNetwork::ConnectLayer(HiddenLayer* layer)
 {
     if (hiddenLayer == NULL)
-    {
-        nIn = input;
-        nOut = output;
-        hiddenLayer = new FcLayer(input, output);
-        return true;
-    }
-    nOut = output;
-    return hiddenLayer->CreateLayer(input, output);
+        hiddenLayer = layer;
+    else
+        hiddenLayer->ConnectChild(layer);
+        
 }
 
 void FcNetwork::Start(bool enablePublishStatus)
 {
     publishNetworkStatus = enablePublishStatus;
     double* parameters = new double[6];
-    inputs = new double[dataLoader->trainingSampleSize]();
-    outputs = new double[dataLoader->trainingLabelSize]();
+    input = new double[dataLoader->trainingSampleSize]();
+    label = new double[dataLoader->trainingLabelSize]();
     while(true)
     {
         Print("\nChoose an Option\n");
@@ -95,14 +93,13 @@ double FcNetwork::TrainNetwork(int epochs, int batchSize, double learningRate, d
             double cost = 0.0;
             for (int i=0; i<batchSize; i++)
             {
-                dataLoader->GetRandomTrainingSample(inputs, outputs);
-                //dataLoader->PrintSentence(inputs, 32);
-                double* output = hiddenLayer->FeedForward(inputs);
-                hiddenLayer->BackPropagate(inputs, outputs);
-                cost += neuralmath::quadraticcost(output, inputs, nOut);
+                dataLoader->GetRandomTrainingSample(input, label);
+                double* output = hiddenLayer->FeedForward(input, 0, 0);
+                hiddenLayer->BackPropagate(input, label);
+                cost += neuralmath::quadraticcost(output, input, nOut);
             }
             
-            hiddenLayer->UpdateParameters(batchSize, learningRate, lambda, dataLoader->numberOfTrainingSamples);
+            ((FcLayer*)hiddenLayer)->UpdateParameters(batchSize, learningRate, lambda, dataLoader->numberOfTrainingSamples);
             cost = double(cost/batchSize);
             
             // Evaluate
@@ -122,10 +119,10 @@ double FcNetwork::EvaluateNetwork(bool subSample)
     
     for (int i=0; i<validationSamples; i++)
     {
-        dataLoader->GetValidationSample(subSample ? -1 : i, inputs, outputs);
+        dataLoader->GetValidationSample(subSample ? -1 : i, input, label);
         //dataLoader->PrintSentence(inputs, 32);
-        double* output = hiddenLayer->FeedForward(inputs);
-        pass += helpers::ParseOutput(output, nOut) == (int)outputs[0] ? 1.0 : 0.0;
+        double* output = hiddenLayer->FeedForward(input, 0, 0);
+        pass += helpers::ParseOutput(output, nOut) == (int)label[0] ? 1.0 : 0.0;
     }
     return helpers::Percentage(pass, validationSamples);
 }

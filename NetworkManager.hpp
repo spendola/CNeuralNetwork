@@ -13,7 +13,7 @@
 #include <iostream>
 #include <unistd.h>
 #include "FcNetwork.hpp"
-#include "CnvNetwork.hpp"
+#include "CnNetwork.hpp"
 #include "RcNetwork.hpp"
 #include "RemoteApi.hpp"
 #include "Common/Helpers.hpp"
@@ -31,6 +31,7 @@ private:
     void MnistFcNetwork();
     void SentAnalysisFcNetwork();
     void LangModelRcNetwork();
+    void ImageRecCnNetwork();
     void ListenForRemote();
     void CleanTemporaryFiles();
     
