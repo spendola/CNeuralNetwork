@@ -147,7 +147,7 @@ double CnNetwork::EvaluateNetwork(bool subSample)
         double* output = hiddenLayer->FeedForward(input, 0, 0);
         int response = (int)helpers::ParseOutput(output, 10);
         pass += response == (int)label[0] ? 1.0 : 0.0;
-        //std::cout << response << ", ";
+        std::cout << response << ", ";
     }
     std::cout << "\n";
     return helpers::Percentage(pass, validationSamples);

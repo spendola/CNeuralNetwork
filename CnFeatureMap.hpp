@@ -23,6 +23,8 @@ class CnFeatureMap : public HiddenLayer
     
 private:
     //double* featureMap;
+    double nabla_b;
+    double nabla_w;
     double* delta_nabla_w;
     double* delta_nabla_b;
     

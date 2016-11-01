@@ -117,38 +117,26 @@ void CnFeatureMap::BackPropagate(double *input, double *label)
     {
         childLayer->BackPropagate(input, label);
         for(int i=0; i<(horizontalSteps*verticalSteps); i++)
-        {
             delta[i] = childLayer->LayerDelta()[i] * neuralmath::sigmoidprime(zethas[i]);
-            if(delta[i] != delta[i])
-            {
-                std::cout << "NAN!!!!\n";
-                std::cout << childLayer->LayerDelta()[i] << " x " << zethas[i] << "\n";
-                helpers::PrintArray("Zethas on BackPropagation", zethas, horizontalSteps*verticalSteps);
-            }
-        }
         
         
         for(int r=0; r<verticalSteps; r++)
             for(int c=0; c<horizontalSteps; c++)
             {
                 int inputIndex = (r*horizontalSteps) + c;
-                delta_nabla_b[0] += delta[inputIndex];
+                nabla_b += delta[inputIndex];
+                
                 for(int fh=0; fh<featureHeight; fh++)
                     for(int fw=0; fw<featureWidth; fw++)
                     {
                         int localIndex = (fh*featureWidth) + fw;
-                        delta_nabla_w[localIndex] += weights[localIndex] * delta[inputIndex];
-                        if (delta_nabla_w[localIndex] != delta_nabla_w[localIndex])
-                        {
-                            std::cout << delta_nabla_w[localIndex] << " = " << weights[localIndex] << " x " << delta[inputIndex];
-                            std::cout << "\n";
-                        }
+                        nabla_w += weights[localIndex] * delta[inputIndex];
                     }
             }
         
-        //delta_nabla_b[0] = delta_nabla_b[0] / (verticalSteps*horizontalSteps);
-        //for(int i=0; i<(featureSize*neuronSize); i++)
-        //    delta_nabla_w[i] = delta_nabla_w[i] / featureSize;
+        delta_nabla_b[0] = nabla_b / (verticalSteps*horizontalSteps);
+        for(int i=0; i<(featureSize*neuronSize); i++)
+            delta_nabla_w[i] = nabla_w / (verticalSteps*horizontalSteps);;
     }
     else
         std::cout << "Couldn't find child layer to backpropagate!!!!\n";
@@ -165,9 +153,8 @@ void CnFeatureMap::UpdateParameters(int batchSize, int numberOfTrainingSamples, 
         -  ((learningRate/double(batchSize))*delta_nabla_w[i]);
         
         if(weights[i] != weights[i])
-        {
             helpers::PrintArray("Delta Nabla W", delta_nabla_w, featureSize);
-        }
+        
         delta_nabla_w[i] = 0.0;
     }
     
