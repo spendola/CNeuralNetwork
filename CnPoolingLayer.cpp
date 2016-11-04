@@ -26,7 +26,7 @@ CnPoolingLayer::CnPoolingLayer(int width, int height, int inputwidth, int inputh
     neuronSize = horizontalSteps*verticalSteps;
     inputSize = inputWidth * inputHeight;
 
-    poolingMap = new double[neuronSize];
+    activations = new double[neuronSize];
     delta = new double[inputSize];
     std::cout << "(output: " << neuronSize << ")\n";
 }
@@ -57,34 +57,41 @@ double* CnPoolingLayer::FeedForward(double* input, int width, int height)
         for(int c=0; c<horizontalSteps; c++)
         {
             double maxPoolingActivation = 0.0;
+            int maxPool = 0;
             for(int fh=0; fh<poolingHeight; fh++)
             {
                 for(int fw=0; fw<poolingWidth; fw++)
                 {
                     int inputIndex = (r*width*poolingHeight) + (c*poolingWidth) + (fh*width) + fw;
-                    maxPoolingActivation = maxPoolingActivation < input[inputIndex] ? input[inputIndex] : maxPoolingActivation;
+                    if(maxPoolingActivation < input[inputIndex])
+                    {
+                        maxPool = inputIndex;
+                        maxPoolingActivation = input[inputIndex];
+                    }
+                    delta[inputIndex] = 0.0;
+                    //maxPoolingActivation = maxPoolingActivation < input[inputIndex] ? input[inputIndex] : maxPoolingActivation;
                 }
             }
-            poolingMap[(r*horizontalSteps)+c] = maxPoolingActivation;
+            delta[maxPool] = 1.0;
+            activations[(r*horizontalSteps)+c] = maxPoolingActivation;
         }
     }
-    
     
     double* retValue = NULL;
     if(siblingLayer != NULL)
         siblingLayer->FeedForward(input, width, height);
     if(childLayer != NULL)
-        retValue = childLayer->FeedForward(poolingMap, horizontalSteps, verticalSteps);
+        retValue = childLayer->FeedForward(activations, horizontalSteps, verticalSteps);
     
     return retValue;
 }
 
 void CnPoolingLayer::BackPropagate(double *input, double *label)
 {
-    //std::cout << "BackPropagating PoolingLayer " << layerIndex << "\n";
     if(childLayer != NULL)
     {
-        childLayer->BackPropagate(input, label);
+        childLayer->BackPropagate(activations, label);
+        
         for(int r=0; r<verticalSteps; r++)
             for(int c=0; c<horizontalSteps; c++)
             {
@@ -93,9 +100,15 @@ void CnPoolingLayer::BackPropagate(double *input, double *label)
                     for(int w=0; w<poolingWidth; w++)
                     {
                         int expandIndex = (c*poolingWidth) + (r*horizontalSteps*poolingWidth*poolingHeight) + (h*horizontalSteps*poolingWidth) + w;
-                        delta[expandIndex] = childLayer->LayerDelta()[(layerIndex*neuronSize) + poolIndex];
+                        delta[expandIndex] = childLayer->LayerDelta()[(layerIndex*neuronSize) + poolIndex] * delta[expandIndex];
                     }
             }
+        
+        // Test
+        // helpers::PrintArray("\nChildLayer", childLayer->LayerDelta(), childLayer->LayerSize());
+        // helpers::PrintArray("\nExpanded", delta, inputSize);
+        // helpers::PrintArray("\nInput", input, inputSize);
+        
     }
     else
         std::cout << "Could not find child layer to Backpropagate\n";

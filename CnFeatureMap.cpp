@@ -115,7 +115,7 @@ void CnFeatureMap::BackPropagate(double *input, double *label)
 {
     if(childLayer != NULL)
     {
-        childLayer->BackPropagate(input, label);
+        childLayer->BackPropagate(activations, label);
         for(int i=0; i<(horizontalSteps*verticalSteps); i++)
             delta[i] = childLayer->LayerDelta()[i] * neuralmath::sigmoidprime(zethas[i]);
         
@@ -134,9 +134,9 @@ void CnFeatureMap::BackPropagate(double *input, double *label)
                     }
             }
         
-        delta_nabla_b[0] = nabla_b / (verticalSteps*horizontalSteps);
+        delta_nabla_b[0] += nabla_b / (verticalSteps*horizontalSteps);
         for(int i=0; i<(featureSize*neuronSize); i++)
-            delta_nabla_w[i] = nabla_w / (verticalSteps*horizontalSteps);;
+            delta_nabla_w[i] += nabla_w / (verticalSteps*horizontalSteps);
     }
     else
         std::cout << "Couldn't find child layer to backpropagate!!!!\n";

@@ -131,7 +131,6 @@ void CnNetwork::AdaptiveTraining(int epochs, int batchSize, double learningRate,
         if(publishNetworkStatus)
             remoteApi->PublishValue(validationRate);
         Print("Accuracy on Training Data: " + helpers::ToString(validationRate) + "\n");
-        Print("Saving Parameters\n");
         //SaveParameters("../Saved/CnParameters.txt");
     }
 }
@@ -158,6 +157,7 @@ void CnNetwork::SaveParameters(std::string path)
     std::deque<double> parameters;
     if(hiddenLayer != NULL)
     {
+        Print("Saving Parameters\n");
         hiddenLayer->SaveParameters(&parameters);
         Print("Saving parameters (" + helpers::ToString(parameters.size()) + " parameters found)");
         if(parameters.size() > 0)

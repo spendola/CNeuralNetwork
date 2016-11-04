@@ -22,7 +22,6 @@ private:
     int poolingHeight;
     int horizontalSteps;
     int verticalSteps;
-    double* poolingMap;
     
 public:
     CnPoolingLayer(int width, int height, int inputwidth, int inputheight);
